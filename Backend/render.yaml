@@ -1,0 +1,33 @@
+# Render Blueprint — deploys the API + a managed PostgreSQL database.
+# In the Render dashboard: New → Blueprint → point at this repo (Backend as root).
+services:
+  - type: web
+    name: luxe-salon-api
+    runtime: node
+    rootDir: Backend
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: CLIENT_URL
+        sync: false # set to your Vercel URL, e.g. https://luxe-salon.vercel.app
+      - key: ADMIN_EMAIL
+        value: admin@luxesalon.com
+      - key: ADMIN_PASSWORD
+        value: Admin@123
+      - key: ADMIN_NAME
+        value: Salon Admin
+      - key: DATABASE_URL
+        fromDatabase:
+          name: luxe-salon-db
+          property: connectionString
+
+databases:
+  - name: luxe-salon-db
+    databaseName: beauty_salon_db
+    plan: free

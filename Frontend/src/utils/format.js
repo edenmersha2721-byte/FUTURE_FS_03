@@ -1,0 +1,42 @@
+export const currency = (n) =>
+  new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0 }).format(
+    Number(n || 0)
+  );
+
+export const duration = (minutes) => {
+  const m = Number(minutes || 0);
+  if (m < 60) return `${m} min`;
+  const h = Math.floor(m / 60);
+  const rem = m % 60;
+  return rem ? `${h}h ${rem}m` : `${h}h`;
+};
+
+export const formatDate = (dateStr) => {
+  if (!dateStr) return '';
+  // dateStr is 'YYYY-MM-DD' — parse as local to avoid TZ shift
+  const [y, mo, d] = String(dateStr).slice(0, 10).split('-').map(Number);
+  const date = new Date(y, mo - 1, d);
+  return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+};
+
+export const formatTime = (timeStr) => {
+  if (!timeStr) return '';
+  const [h, m] = String(timeStr).split(':').map(Number);
+  const period = h >= 12 ? 'PM' : 'AM';
+  const hour12 = h % 12 || 12;
+  return `${hour12}:${String(m).padStart(2, '0')} ${period}`;
+};
+
+export const todayISO = () => {
+  const d = new Date();
+  const off = d.getTimezoneOffset();
+  return new Date(d.getTime() - off * 60000).toISOString().slice(0, 10);
+};
+
+export const statusColor = (status) =>
+  ({
+    pending: 'bg-amber-100 text-amber-700',
+    confirmed: 'bg-blue-100 text-blue-700',
+    completed: 'bg-emerald-100 text-emerald-700',
+    cancelled: 'bg-rose-100 text-rose-700',
+  }[status] || 'bg-gray-100 text-gray-600');

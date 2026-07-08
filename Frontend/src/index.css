@@ -1,0 +1,62 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-cream text-charcoal font-sans antialiased;
+  }
+  h1, h2, h3, h4 {
+    @apply font-serif;
+  }
+  ::selection {
+    @apply bg-gold/30;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-medium tracking-wide transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed;
+  }
+  .btn-gold {
+    @apply btn bg-gold-gradient text-charcoal shadow-gold hover:brightness-105 hover:-translate-y-0.5;
+  }
+  .btn-dark {
+    @apply btn bg-charcoal text-cream hover:bg-espresso hover:-translate-y-0.5;
+  }
+  .btn-outline {
+    @apply btn border border-gold/60 text-charcoal hover:bg-gold/10;
+  }
+  .btn-ghost {
+    @apply btn text-charcoal hover:bg-beige;
+  }
+  .input {
+    @apply w-full rounded-xl border border-sand bg-white/70 px-4 py-3 text-sm text-charcoal placeholder:text-muted/60 outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30;
+  }
+  .label {
+    @apply mb-1.5 block text-sm font-medium text-espresso;
+  }
+  .card {
+    @apply rounded-2xl bg-white shadow-soft;
+  }
+  .section-title {
+    @apply font-serif text-4xl md:text-5xl font-semibold text-charcoal;
+  }
+  .eyebrow {
+    @apply text-xs font-semibold uppercase tracking-[0.25em] text-gold-dark;
+  }
+  .container-lux {
+    @apply mx-auto w-full max-w-7xl px-5 sm:px-8;
+  }
+}
+
+/* Thin luxury scrollbar */
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-track { background: #F3E9DC; }
+::-webkit-scrollbar-thumb { background: #C9A15A; border-radius: 999px; }
+
+/* Leaflet z-index below navbar */
+.leaflet-container { z-index: 0; }
