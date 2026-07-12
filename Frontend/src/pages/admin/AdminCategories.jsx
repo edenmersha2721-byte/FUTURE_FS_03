@@ -64,13 +64,13 @@ export default function AdminCategories() {
             </div>
             <div className="p-4">
               <div className="flex items-center justify-between">
-                <h3 className="font-serif text-xl text-charcoal">{c.name}</h3>
-                <span className="rounded-full bg-beige px-2 py-0.5 text-xs text-muted">{c.service_count} services</span>
+                <h3 className="font-serif text-xl text-cream">{c.name}</h3>
+                <span className="rounded-full bg-white/5 px-2 py-0.5 text-xs text-muted">{c.service_count} services</span>
               </div>
               <p className="mt-1 line-clamp-2 text-sm text-muted">{c.description}</p>
               <div className="mt-3 flex justify-end gap-2">
-                <button onClick={() => openEdit(c)} className="rounded-lg p-2 text-blue-600 hover:bg-blue-50"><Pencil size={15} /></button>
-                <button onClick={() => remove(c.id)} className="rounded-lg p-2 text-rose-500 hover:bg-rose-50"><Trash2 size={15} /></button>
+                <button onClick={() => openEdit(c)} className="rounded-lg p-2 text-blue-300 hover:bg-blue-500/10"><Pencil size={15} /></button>
+                <button onClick={() => remove(c.id)} className="rounded-lg p-2 text-rose-300 hover:bg-rose-500/10"><Trash2 size={15} /></button>
               </div>
             </div>
           </div>

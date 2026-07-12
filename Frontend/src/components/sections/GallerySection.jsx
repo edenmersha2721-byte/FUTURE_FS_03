@@ -17,7 +17,7 @@ export default function GallerySection() {
   if (!items.length) return null;
 
   return (
-    <section id="gallery" className="flex min-h-screen flex-col justify-center bg-cream py-24">
+    <section id="gallery" className="flex min-h-screen flex-col justify-center bg-charcoal py-24">
       <div className="container-lux w-full">
         <SectionHeading
           eyebrow="Portfolio"
@@ -30,7 +30,7 @@ export default function GallerySection() {
             <motion.button
               key={item.id}
               onClick={() => setLightbox(item)}
-              className="group relative aspect-square overflow-hidden rounded-2xl"
+              className="group relative aspect-square overflow-hidden rounded-2xl border border-line"
               initial={{ opacity: 0, scale: 0.95 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}

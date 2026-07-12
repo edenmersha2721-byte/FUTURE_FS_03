@@ -75,7 +75,7 @@ export default function ImageInput({
           <div
             ref={frameRef}
             onPointerDown={onPointerDown}
-            className={`relative mb-2 aspect-[4/3] w-full select-none overflow-hidden rounded-xl border border-sand ${
+            className={`relative mb-2 aspect-[4/3] w-full select-none overflow-hidden rounded-xl border border-line ${
               repositionable ? 'cursor-grab active:cursor-grabbing' : ''
             }`}
           >
@@ -94,7 +94,7 @@ export default function ImageInput({
             <button
               type="button"
               onClick={() => onChange('')}
-              className="absolute right-2 top-2 rounded-full bg-white/90 p-1.5 text-rose-500 shadow hover:bg-white"
+              className="absolute right-2 top-2 rounded-full bg-black/60 p-1.5 text-rose-300 shadow hover:bg-black/80"
               title="Remove"
             >
               <X size={14} />
@@ -102,7 +102,7 @@ export default function ImageInput({
           </div>
 
           {repositionable && (
-            <div className="mb-3 space-y-2 rounded-xl bg-beige/40 p-3">
+            <div className="mb-3 space-y-2 rounded-xl bg-white/[0.04] p-3">
               <div className="flex items-center gap-3">
                 <Move size={15} className="shrink-0 text-muted" />
                 <input
@@ -123,7 +123,7 @@ export default function ImageInput({
                 <button
                   type="button"
                   onClick={() => { onPosYChange(50); onZoomChange(1); }}
-                  className="flex shrink-0 items-center gap-1 rounded-lg px-2 py-1 text-xs text-muted hover:bg-white"
+                  className="flex shrink-0 items-center gap-1 rounded-lg px-2 py-1 text-xs text-muted hover:bg-white/10"
                   title="Reset"
                 >
                   <RotateCcw size={13} /> Reset
@@ -139,7 +139,7 @@ export default function ImageInput({
           type="button"
           onClick={() => fileRef.current?.click()}
           disabled={uploading}
-          className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-dashed border-sand px-4 py-2.5 text-sm text-muted transition hover:border-gold"
+          className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-dashed border-line px-4 py-2.5 text-sm text-muted transition hover:border-gold"
         >
           {uploading ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
           {uploading ? 'Uploading…' : 'Upload from device'}

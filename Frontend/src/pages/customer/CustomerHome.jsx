@@ -43,11 +43,11 @@ export default function CustomerHome() {
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {stats.map((s) => (
           <div key={s.label} className="card flex items-center gap-4 p-5">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gold/15 text-gold-dark">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gold/15 text-gold">
               <s.icon size={22} />
             </div>
             <div>
-              <p className="font-serif text-3xl font-bold text-charcoal">{s.value}</p>
+              <p className="font-serif text-3xl font-bold text-cream">{s.value}</p>
               <p className="text-xs uppercase tracking-wide text-muted">{s.label}</p>
             </div>
           </div>
@@ -58,7 +58,7 @@ export default function CustomerHome() {
       <div className="card p-6">
         <div className="flex items-center justify-between">
           <h3 className="font-serif text-2xl">Upcoming Appointments</h3>
-          <Link to="/dashboard/appointments" className="text-sm font-medium text-gold-dark hover:underline">View all</Link>
+          <Link to="/dashboard/appointments" className="text-sm font-medium text-gold hover:underline">View all</Link>
         </div>
         {upcoming.length === 0 ? (
           <div className="py-10 text-center text-muted">
@@ -68,13 +68,13 @@ export default function CustomerHome() {
         ) : (
           <div className="mt-5 space-y-3">
             {upcoming.slice(0, 4).map((a) => (
-              <div key={a.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-sand p-4">
+              <div key={a.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-line p-4">
                 <div>
-                  <p className="font-medium text-charcoal">{a.service_name || a.service_name_snapshot}</p>
+                  <p className="font-medium text-cream">{a.service_name || a.service_name_snapshot}</p>
                   <p className="text-sm text-muted">{formatDate(a.appointment_date)} · {formatTime(a.appointment_time)}</p>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="font-serif font-semibold text-gold-dark">{currency(a.price_snapshot)}</span>
+                  <span className="font-serif font-semibold text-gold">{currency(a.price_snapshot)}</span>
                   <span className={`rounded-full px-3 py-1 text-xs font-medium capitalize ${statusColor(a.status)}`}>{a.status}</span>
                 </div>
               </div>

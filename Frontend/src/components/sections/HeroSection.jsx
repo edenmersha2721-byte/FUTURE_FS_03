@@ -1,32 +1,26 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CalendarCheck, Phone, MessageCircle, MapPin, Sparkles } from 'lucide-react';
+import { CalendarCheck, Phone, Send, MapPin, Sparkles } from 'lucide-react';
 
 const slides = [
   {
-    img: '/homepage image.png',
+    img: '/home bg.png',
     tagline: 'Feel Beautiful, Feel You',
     title: ['Where Beauty', 'Meets ', 'Excellence'],
     text: 'Experience premium beauty and wellness services designed to bring out your best.',
   },
   {
-    img: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=1600&q=80',
+    img: '/home page bg.png',
     tagline: 'Indulge & Unwind',
     title: ['Luxury Care', 'For ', 'Every You'],
     text: 'From radiant hair to soothing spa rituals — crafted by expert hands.',
   },
-  {
-    img: 'https://images.unsplash.com/photo-1600334129128-685c5582fd35?w=1600&q=80',
-    tagline: 'Relax. Refresh. Renew.',
-    title: ['Your Sanctuary', 'Of ', 'Beauty'],
-    text: 'Step into a world of elegance, comfort and personalized attention.',
-  },
 ];
 
 const sideActions = [
-  { icon: Phone, label: 'Call Us', href: 'tel:+15551234567' },
-  { icon: MessageCircle, label: 'WhatsApp', href: 'https://wa.me/15551234567' },
+  { icon: Phone, label: 'Call Us', href: 'tel:+251910985642' },
+  { icon: Send, label: 'Telegram', href: 'https://t.me/amrabeautyspace' },
   { icon: MapPin, label: 'Location', href: '#contact' },
 ];
 
@@ -41,8 +35,8 @@ export default function HeroSection() {
   const slide = slides[index];
 
   return (
-    <section id="home" className="relative flex min-h-screen items-center overflow-hidden bg-charcoal">
-      {/* Background image crossfade */}
+    <section id="home" className="relative flex min-h-screen items-center overflow-hidden bg-ink">
+      {/* Background image crossfade — interchanges the two dark home images */}
       <AnimatePresence mode="wait">
         <motion.div
           key={index}
@@ -52,8 +46,9 @@ export default function HeroSection() {
           exit={{ opacity: 0 }}
           transition={{ duration: 1.2, ease: 'easeOut' }}
         >
-          <img src={slide.img} alt="" className="h-full w-full object-cover" />
+          <img src={slide.img} alt="" className="h-full w-full object-cover object-center" />
           <div className="absolute inset-0 bg-hero-fade" />
+          <div className="absolute inset-0 bg-hero-bottom" />
         </motion.div>
       </AnimatePresence>
 
@@ -73,9 +68,9 @@ export default function HeroSection() {
                 {slide.title[0]}
                 <br />
                 {slide.title[1]}
-                <span className="text-gold">{slide.title[2]}</span>
+                <span className="gold-text italic">{slide.title[2]}</span>
               </h1>
-              <div className="mt-6 h-px w-24 bg-gold/70" />
+              <div className="mt-6 h-px w-24 bg-gradient-to-r from-gold to-transparent" />
               <p className="mt-6 max-w-lg text-lg text-cream/80">{slide.text}</p>
             </motion.div>
           </AnimatePresence>

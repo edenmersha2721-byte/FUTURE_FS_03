@@ -35,8 +35,8 @@ export const todayISO = () => {
 
 export const statusColor = (status) =>
   ({
-    pending: 'bg-amber-100 text-amber-700',
-    confirmed: 'bg-blue-100 text-blue-700',
-    completed: 'bg-emerald-100 text-emerald-700',
-    cancelled: 'bg-rose-100 text-rose-700',
-  }[status] || 'bg-gray-100 text-gray-600');
+    pending: 'bg-amber-400/15 text-amber-300 border border-amber-400/25',
+    confirmed: 'bg-blue-400/15 text-blue-300 border border-blue-400/25',
+    completed: 'bg-emerald-400/15 text-emerald-300 border border-emerald-400/25',
+    cancelled: 'bg-rose-400/15 text-rose-300 border border-rose-400/25',
+  }[status] || 'bg-white/10 text-cream/70 border border-line');

@@ -11,13 +11,13 @@ import Reveal from '../components/common/Reveal.jsx';
 
 function CtaBanner() {
   return (
-    <section className="bg-ivory pb-24">
+    <section className="bg-ink pb-24">
       <div className="container-lux">
         <Reveal>
           <div className="flex flex-col items-center justify-between gap-6 rounded-3xl bg-gold-gradient px-8 py-12 text-center shadow-gold md:flex-row md:text-left">
             <div>
               <h3 className="font-serif text-3xl font-semibold text-charcoal md:text-4xl">
-                Ready to experience the Luxe difference?
+                Ready to experience the Amra Beauty difference?
               </h3>
               <p className="mt-2 text-charcoal/80">
                 Book your appointment today and let us bring out the best in you.

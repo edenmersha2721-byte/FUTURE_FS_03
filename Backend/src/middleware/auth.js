@@ -28,6 +28,29 @@ export const protect = async (req, res, next) => {
   }
 };
 
+/**
+ * Attaches req.user if a valid token is present, but never rejects.
+ * Used for endpoints that work for both guests and logged-in users.
+ */
+export const optionalAuth = async (req, res, next) => {
+  try {
+    const header = req.headers.authorization || '';
+    const token = header.startsWith('Bearer ') ? header.slice(7) : null;
+    if (!token) return next();
+
+    const decoded = verifyToken(token);
+    const { rows } = await query(
+      'SELECT id, name, email, role, is_active FROM users WHERE id = $1',
+      [decoded.id]
+    );
+    const user = rows[0];
+    if (user && user.is_active) req.user = user;
+  } catch {
+    // Ignore invalid/expired tokens — treat as a guest.
+  }
+  next();
+};
+
 /** Require the authenticated user to have a specific role. */
 export const requireRole = (...roles) => (req, res, next) => {
   if (!req.user) return next(ApiError.unauthorized());

@@ -7,7 +7,7 @@ const FALLBACK_IMG = 'https://images.unsplash.com/photo-1560066984-138dadb4c035?
 
 export default function ServiceCard({ service }) {
   return (
-    <div className="group card overflow-hidden transition-all duration-300 hover:-translate-y-1.5 hover:shadow-gold">
+    <div className="group card overflow-hidden transition-all duration-300 hover:-translate-y-1.5 hover:border-gold/50 hover:shadow-gold">
       <div className="relative aspect-[4/3] overflow-hidden">
         <img
           src={assetUrl(service.image_url) || FALLBACK_IMG}
@@ -29,17 +29,17 @@ export default function ServiceCard({ service }) {
         )}
       </div>
       <div className="p-5">
-        <h3 className="font-serif text-xl text-charcoal">{service.name}</h3>
+        <h3 className="font-serif text-xl text-cream">{service.name}</h3>
         <p className="mt-1.5 line-clamp-2 text-sm text-muted">{service.description}</p>
         <div className="mt-4 flex items-center justify-between">
           <span className="flex items-center gap-1.5 text-sm text-muted">
-            <Clock size={15} className="text-gold-dark" /> {duration(service.duration_minutes)}
+            <Clock size={15} className="text-gold" /> {duration(service.duration_minutes)}
           </span>
-          <span className="font-serif text-2xl font-semibold text-gold-dark">{currency(service.price)}</span>
+          <span className="gold-text font-serif text-2xl font-semibold">{currency(service.price)}</span>
         </div>
         <Link
           to={`/book?service=${service.id}`}
-          className="btn-dark mt-4 w-full"
+          className="btn-gold mt-4 w-full"
         >
           Book Now
         </Link>

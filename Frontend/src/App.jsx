@@ -38,15 +38,8 @@ export default function App() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
 
-      {/* Booking (requires login) */}
-      <Route
-        path="/book"
-        element={
-          <ProtectedRoute role="customer">
-            <BookingPage />
-          </ProtectedRoute>
-        }
-      />
+      {/* Booking — open to guests and logged-in customers */}
+      <Route path="/book" element={<BookingPage />} />
 
       {/* Customer dashboard */}
       <Route

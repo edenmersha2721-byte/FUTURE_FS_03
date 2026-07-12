@@ -1,17 +1,17 @@
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
-import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import {
-  Phone, Mail, MapPin, Clock, Send, Instagram, Facebook, Youtube,
+  Phone, Mail, MapPin, Clock, Send, Instagram,
   Navigation, Loader2, Car, ExternalLink,
 } from 'lucide-react';
 import SectionHeading from '../common/SectionHeading.jsx';
 import Reveal from '../common/Reveal.jsx';
 import { contactApi } from '../../api/endpoints.js';
 
-// Luxe Salon — 4 Kilo, Bashawelde Condominium, Addis Ababa
+// Amra Beauty — 4 Kilo, Bashawelde Condominium, Addis Ababa
 const SALON_POSITION = [9.0356, 38.7638];
 
 const pin = (fill, stroke) =>
@@ -38,11 +38,31 @@ function FitBounds({ points }) {
   return null;
 }
 
+// Clicking the map opens the location on OpenStreetMap in a new tab.
+function OpenStreetMapOnClick({ position }) {
+  useMapEvents({
+    click() {
+      const [lat, lon] = position;
+      window.open(
+        `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}#map=17/${lat}/${lon}`,
+        '_blank',
+        'noopener,noreferrer'
+      );
+    },
+  });
+  return null;
+}
+
 const contactInfo = [
-  { icon: Phone, title: 'Phone', lines: ['+1 (555) 123-4567'] },
-  { icon: Mail, title: 'Email', lines: ['info@luxesalon.com'] },
+  { icon: Phone, title: 'Phone', lines: ['0910 98 5642'] },
+  { icon: Mail, title: 'Email', lines: ['senaytgobezie@gmail.com'] },
   { icon: MapPin, title: 'Address', lines: ['4 Kilo, Bashawelde Condominium', 'Addis Ababa, Ethiopia'] },
   { icon: Clock, title: 'Business Hours', lines: ['Mon – Sat: 9:00 AM – 8:00 PM', 'Sunday: 10:00 AM – 6:00 PM'] },
+];
+
+const socials = [
+  { Icon: Instagram, href: 'https://www.instagram.com/amra___beauty/?hl=en', label: 'Instagram' },
+  { Icon: Send, href: 'https://t.me/amrabeautyspace', label: 'Telegram' },
 ];
 
 const osmDirectionsUrl = (from) => {
@@ -116,7 +136,7 @@ export default function ContactSection() {
   };
 
   return (
-    <section id="contact" className="flex min-h-screen flex-col justify-center bg-cream py-24">
+    <section id="contact" className="flex min-h-screen flex-col justify-center bg-charcoal py-24">
       <div className="container-lux w-full">
         <SectionHeading
           eyebrow="Get In Touch"
@@ -129,11 +149,11 @@ export default function ContactSection() {
           <Reveal className="space-y-6">
             {contactInfo.map((c) => (
               <div key={c.title} className="flex items-start gap-4">
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gold/15 text-gold-dark">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-gold/25 bg-gold/10 text-gold">
                   <c.icon size={19} />
                 </span>
                 <div>
-                  <p className="font-semibold text-charcoal">{c.title}</p>
+                  <p className="font-semibold text-cream">{c.title}</p>
                   {c.lines.map((l) => (
                     <p key={l} className="text-sm text-muted">{l}</p>
                   ))}
@@ -141,9 +161,16 @@ export default function ContactSection() {
               </div>
             ))}
             <div className="flex items-center gap-3 pt-2">
-              <span className="text-sm font-medium text-charcoal">Follow Us</span>
-              {[Instagram, Facebook, Youtube].map((Icon, i) => (
-                <a key={i} href="#" className="flex h-9 w-9 items-center justify-center rounded-full bg-charcoal text-cream transition hover:bg-gold hover:text-charcoal">
+              <span className="text-sm font-medium text-cream">Follow Us</span>
+              {socials.map(({ Icon, href, label }) => (
+                <a
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label={label}
+                  className="flex h-9 w-9 items-center justify-center rounded-full border border-line bg-white/5 text-cream transition hover:bg-gold hover:text-charcoal"
+                >
                   <Icon size={15} />
                 </a>
               ))}
@@ -153,7 +180,7 @@ export default function ContactSection() {
           {/* Form */}
           <Reveal delay={0.1} className="lg:col-span-2">
             <div className="card p-6 md:p-8">
-              <h3 className="font-serif text-2xl text-charcoal">Send Us a Message</h3>
+              <h3 className="font-serif text-2xl text-cream">Send Us a Message</h3>
               <form onSubmit={handleSubmit(onSubmit)} className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                   <input className="input" placeholder="Your Name" {...register('name', { required: 'Name is required' })} />
@@ -181,22 +208,22 @@ export default function ContactSection() {
                   />
                   {errors.message && <p className="mt-1 text-xs text-rose-500">{errors.message.message}</p>}
                 </div>
-                <button disabled={submitting} className="btn-dark sm:col-span-2 sm:w-max">
+                <button disabled={submitting} className="btn-gold sm:col-span-2 sm:w-max">
                   {submitting ? 'Sending…' : 'Send Message'} <Send size={16} />
                 </button>
               </form>
 
               {/* Directions bar */}
-              <div className="mt-6 flex flex-col items-start justify-between gap-3 rounded-2xl bg-beige/50 p-4 sm:flex-row sm:items-center">
-                <div className="flex items-center gap-2 text-sm text-espresso">
-                  <MapPin size={16} className="text-gold-dark" />
+              <div className="mt-6 flex flex-col items-start justify-between gap-3 rounded-2xl border border-line bg-white/[0.03] p-4 sm:flex-row sm:items-center">
+                <div className="flex items-center gap-2 text-sm text-cream/80">
+                  <MapPin size={16} className="text-gold" />
                   {routeInfo ? (
                     <span className="flex items-center gap-3">
                       <span className="flex items-center gap-1 font-medium"><Car size={15} /> {routeInfo.distanceKm} km</span>
                       <span className="text-muted">≈ {routeInfo.durationMin} min drive</span>
                     </span>
                   ) : (
-                    <span>Find your way to Luxe Salon</span>
+                    <span>Find your way to Amra Beauty</span>
                   )}
                 </div>
                 <div className="flex items-center gap-2">
@@ -217,14 +244,15 @@ export default function ContactSection() {
               </div>
 
               {/* Map */}
-              <div className="mt-4 h-72 overflow-hidden rounded-2xl border border-sand">
+              <div className="mt-4 h-72 overflow-hidden rounded-2xl border border-line">
                 <MapContainer center={SALON_POSITION} zoom={15} className="h-full w-full" scrollWheelZoom={false}>
                   <TileLayer
                     attribution='&copy; OpenStreetMap contributors'
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                   />
+                  <OpenStreetMapOnClick position={SALON_POSITION} />
                   <Marker position={SALON_POSITION} icon={goldPin}>
-                    <Popup>Luxe Salon<br />4 Kilo, Bashawelde Condominium</Popup>
+                    <Popup>Amra Beauty<br />4 Kilo, Bashawelde Condominium</Popup>
                   </Marker>
                   {userPos && (
                     <Marker position={userPos} icon={userPin}>
@@ -235,6 +263,9 @@ export default function ContactSection() {
                   {route && <FitBounds points={route} />}
                 </MapContainer>
               </div>
+              <p className="mt-2 flex items-center gap-1.5 text-xs text-muted">
+                <ExternalLink size={12} className="text-gold" /> Tip: click the map to open this location in OpenStreetMap.
+              </p>
             </div>
           </Reveal>
         </div>

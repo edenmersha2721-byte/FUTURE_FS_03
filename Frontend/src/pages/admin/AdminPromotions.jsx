@@ -71,12 +71,12 @@ export default function AdminPromotions() {
               {!p.is_active && <span className="absolute left-2 top-2 rounded-full bg-charcoal/80 px-2 py-0.5 text-xs text-cream">Inactive</span>}
             </div>
             <div className="p-4">
-              <h3 className="font-serif text-lg text-charcoal">{p.title}</h3>
+              <h3 className="font-serif text-lg text-cream">{p.title}</h3>
               <p className="mt-1 line-clamp-2 text-sm text-muted">{p.description}</p>
               {p.end_date && <p className="mt-2 text-xs text-muted">Until {formatDate(p.end_date)}</p>}
               <div className="mt-3 flex justify-end gap-2">
-                <button onClick={() => openEdit(p)} className="rounded-lg p-2 text-blue-600 hover:bg-blue-50"><Pencil size={15} /></button>
-                <button onClick={() => remove(p.id)} className="rounded-lg p-2 text-rose-500 hover:bg-rose-50"><Trash2 size={15} /></button>
+                <button onClick={() => openEdit(p)} className="rounded-lg p-2 text-blue-300 hover:bg-blue-500/10"><Pencil size={15} /></button>
+                <button onClick={() => remove(p.id)} className="rounded-lg p-2 text-rose-300 hover:bg-rose-500/10"><Trash2 size={15} /></button>
               </div>
             </div>
           </div>

@@ -17,7 +17,7 @@ export default function TestimonialsSection() {
   if (!reviews.length) return null;
 
   return (
-    <section id="reviews" className="flex min-h-screen flex-col justify-center bg-ivory py-24">
+    <section id="reviews" className="flex min-h-screen flex-col justify-center bg-ink py-24">
       <div className="container-lux w-full">
         <SectionHeading
           eyebrow="Testimonials"
@@ -28,24 +28,24 @@ export default function TestimonialsSection() {
         <div className="mt-12 grid grid-cols-1 gap-8 md:grid-cols-3">
           {reviews.slice(0, 6).map((r, i) => (
             <Reveal key={r.id} delay={i * 0.1}>
-              <div className="relative h-full rounded-3xl bg-white p-8 shadow-soft">
+              <div className="card-glow h-full p-8">
                 <Quote className="absolute right-6 top-6 text-gold/25" size={44} />
-                <div className="flex gap-1">
+                <div className="relative flex gap-1">
                   {Array.from({ length: 5 }).map((_, k) => (
                     <Star
                       key={k}
                       size={16}
-                      className={k < r.rating ? 'fill-gold text-gold' : 'text-sand'}
+                      className={k < r.rating ? 'fill-gold text-gold' : 'text-line'}
                     />
                   ))}
                 </div>
-                <p className="mt-4 leading-relaxed text-muted">“{r.comment}”</p>
-                <div className="mt-6 flex items-center gap-3">
+                <p className="relative mt-4 leading-relaxed text-cream/80">“{r.comment}”</p>
+                <div className="relative mt-6 flex items-center gap-3">
                   <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gold-gradient font-serif text-lg font-bold text-charcoal">
                     {r.customer_name?.[0]?.toUpperCase() || 'G'}
                   </div>
                   <div>
-                    <p className="font-medium text-charcoal">{r.customer_name}</p>
+                    <p className="font-medium text-cream">{r.customer_name}</p>
                     {r.service_name && <p className="text-xs text-muted">{r.service_name}</p>}
                   </div>
                 </div>

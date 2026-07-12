@@ -35,7 +35,7 @@ export default function LoginPage() {
       footer={
         <>
           Don’t have an account?{' '}
-          <Link to="/register" className="font-medium text-gold-dark hover:underline">
+          <Link to="/register" className="font-medium text-gold hover:underline">
             Create one
           </Link>
         </>
@@ -64,7 +64,7 @@ export default function LoginPage() {
             <button
               type="button"
               onClick={() => setShow((s) => !s)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-charcoal"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-cream"
             >
               {show ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
@@ -77,8 +77,8 @@ export default function LoginPage() {
         </button>
       </form>
 
-      <div className="mt-6 rounded-xl bg-beige/60 p-4 text-xs text-muted">
-        <p className="font-medium text-espresso">Demo accounts</p>
+      <div className="mt-6 rounded-xl border border-line bg-white/[0.03] p-4 text-xs text-muted">
+        <p className="font-medium text-cream/90">Demo accounts</p>
         <p className="mt-1">Admin: admin@luxesalon.com / Admin@123</p>
         <p>Customer: customer@luxesalon.com / Customer@123</p>
       </div>

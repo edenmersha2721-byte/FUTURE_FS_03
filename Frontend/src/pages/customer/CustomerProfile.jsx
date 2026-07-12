@@ -31,7 +31,7 @@ export default function CustomerProfile() {
             {user?.name?.[0]?.toUpperCase()}
           </div>
           <div>
-            <h3 className="font-serif text-2xl text-charcoal">{user?.name}</h3>
+            <h3 className="font-serif text-2xl text-cream">{user?.name}</h3>
             <p className="text-muted">{user?.email}</p>
           </div>
         </div>
@@ -47,7 +47,7 @@ export default function CustomerProfile() {
           </div>
           <div>
             <label className="label">Email (read-only)</label>
-            <input className="input bg-beige/40" value={user?.email} readOnly />
+            <input className="input bg-white/[0.04]" value={user?.email} readOnly />
           </div>
           <button disabled={saving} className="btn-gold">{saving ? 'Saving…' : 'Save Changes'} <Save size={16} /></button>
         </form>

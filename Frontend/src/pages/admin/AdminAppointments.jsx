@@ -37,7 +37,7 @@ export default function AdminAppointments() {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-wrap gap-2">
           {FILTERS.map((f) => (
-            <button key={f} onClick={() => setStatus(f)} className={`rounded-full border px-4 py-1.5 text-sm capitalize transition ${status === f ? 'border-charcoal bg-charcoal text-cream' : 'border-sand bg-white hover:border-gold'}`}>{f}</button>
+            <button key={f} onClick={() => setStatus(f)} className={`rounded-full border px-4 py-1.5 text-sm capitalize transition ${status === f ? 'border-gold/60 bg-gold/15 text-gold' : 'border-line bg-white/5 hover:border-gold'}`}>{f}</button>
           ))}
         </div>
         <form onSubmit={(e) => { e.preventDefault(); load(); }} className="relative w-full max-w-xs">
@@ -51,7 +51,7 @@ export default function AdminAppointments() {
       ) : (
         <div className="card overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="bg-beige/50 text-xs uppercase tracking-wide text-muted">
+            <thead className="bg-white/[0.03] text-xs uppercase tracking-wide text-muted">
               <tr>
                 <th className="px-4 py-3">Customer</th>
                 <th className="px-4 py-3">Service</th>
@@ -63,25 +63,25 @@ export default function AdminAppointments() {
             </thead>
             <tbody>
               {items.map((a) => (
-                <tr key={a.id} className="border-t border-sand/60 align-top">
+                <tr key={a.id} className="border-t border-line/60 align-top">
                   <td className="px-4 py-3">
-                    <p className="font-medium text-charcoal">{a.customer_name}</p>
+                    <p className="font-medium text-cream">{a.customer_name}</p>
                     <p className="flex items-center gap-1 text-xs text-muted"><Mail size={11} /> {a.customer_email}</p>
                     {a.customer_phone && <p className="flex items-center gap-1 text-xs text-muted"><Phone size={11} /> {a.customer_phone}</p>}
                   </td>
                   <td className="px-4 py-3 text-muted">{a.service_name || a.service_name_snapshot}</td>
                   <td className="px-4 py-3 text-muted">{formatDate(a.appointment_date)}<br />{formatTime(a.appointment_time)}</td>
-                  <td className="px-4 py-3 font-medium text-gold-dark">{currency(a.price_snapshot)}</td>
+                  <td className="px-4 py-3 font-medium text-gold">{currency(a.price_snapshot)}</td>
                   <td className="px-4 py-3"><span className={`rounded-full px-2.5 py-1 text-xs font-medium capitalize ${statusColor(a.status)}`}>{a.status}</span></td>
                   <td className="px-4 py-3">
                     <div className="flex flex-wrap justify-end gap-1.5">
                       {a.status === 'pending' && (
-                        <button onClick={() => setStatusOf(a.id, 'confirmed')} title="Confirm" className="rounded-lg bg-blue-50 p-2 text-blue-600 hover:bg-blue-100"><Check size={15} /></button>
+                        <button onClick={() => setStatusOf(a.id, 'confirmed')} title="Confirm" className="rounded-lg bg-blue-500/15 p-2 text-blue-300 hover:bg-blue-500/25"><Check size={15} /></button>
                       )}
                       {['pending', 'confirmed'].includes(a.status) && (
                         <>
-                          <button onClick={() => setStatusOf(a.id, 'completed')} title="Complete" className="rounded-lg bg-emerald-50 p-2 text-emerald-600 hover:bg-emerald-100"><CheckCircle2 size={15} /></button>
-                          <button onClick={() => setStatusOf(a.id, 'cancelled')} title="Cancel" className="rounded-lg bg-rose-50 p-2 text-rose-500 hover:bg-rose-100"><XCircle size={15} /></button>
+                          <button onClick={() => setStatusOf(a.id, 'completed')} title="Complete" className="rounded-lg bg-emerald-500/15 p-2 text-emerald-300 hover:bg-emerald-500/25"><CheckCircle2 size={15} /></button>
+                          <button onClick={() => setStatusOf(a.id, 'cancelled')} title="Cancel" className="rounded-lg bg-rose-500/15 p-2 text-rose-300 hover:bg-rose-500/25"><XCircle size={15} /></button>
                         </>
                       )}
                     </div>

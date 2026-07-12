@@ -7,12 +7,14 @@ import {
   updateAppointmentStatus,
   getAppointment,
 } from '../controllers/appointmentController.js';
-import { protect, requireAdmin } from '../middleware/auth.js';
+import { protect, requireAdmin, optionalAuth } from '../middleware/auth.js';
 
 const router = Router();
 
+// Booking — open to guests and logged-in customers
+router.post('/', optionalAuth, createAppointment);
+
 // Customer
-router.post('/', protect, createAppointment);
 router.get('/mine', protect, myAppointments);
 router.put('/:id/cancel', protect, cancelMyAppointment);
 

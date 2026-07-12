@@ -4,19 +4,25 @@ export default {
   theme: {
     extend: {
       colors: {
-        cream: '#FBF7F0',
+        // Light foreground accents (text/icons on dark surfaces)
+        cream: '#F6EFE4',
         ivory: '#FFFDF9',
         beige: '#F3E9DC',
         sand: '#E9DCC9',
         gold: {
-          DEFAULT: '#C9A15A',
+          DEFAULT: '#CBA35C',
           light: '#E8C99B',
           dark: '#A87C3C',
         },
-        charcoal: '#1A1613',
-        cocoa: '#2A231C',
-        espresso: '#3B2F26',
-        muted: '#6B5E52',
+        // Dark luxury surfaces (page → panels)
+        ink: '#0B0908',
+        charcoal: '#131010',
+        cocoa: '#1B1613',
+        espresso: '#241D18',
+        panel: '#161211',
+        'panel-2': '#1E1815',
+        line: '#2B241E',
+        muted: '#9E9082',
       },
       fontFamily: {
         serif: ['"Cormorant Garamond"', 'Georgia', 'serif'],
@@ -24,12 +30,15 @@ export default {
         script: ['"Dancing Script"', 'cursive'],
       },
       boxShadow: {
-        soft: '0 10px 40px -10px rgba(60, 47, 38, 0.15)',
-        gold: '0 10px 30px -8px rgba(201, 161, 90, 0.4)',
+        soft: '0 20px 50px -20px rgba(0, 0, 0, 0.6)',
+        gold: '0 14px 40px -12px rgba(203, 163, 92, 0.45)',
       },
       backgroundImage: {
-        'gold-gradient': 'linear-gradient(135deg, #E8C99B 0%, #C9A15A 50%, #A87C3C 100%)',
-        'hero-fade': 'linear-gradient(90deg, rgba(26,22,19,0.92) 0%, rgba(26,22,19,0.55) 50%, rgba(26,22,19,0.15) 100%)',
+        'gold-gradient': 'linear-gradient(135deg, #E8C99B 0%, #CBA35C 50%, #A87C3C 100%)',
+        'gold-text': 'linear-gradient(135deg, #F3DDB2 0%, #CBA35C 55%, #A87C3C 100%)',
+        'hero-fade': 'linear-gradient(90deg, rgba(8,7,6,0.94) 0%, rgba(8,7,6,0.70) 45%, rgba(8,7,6,0.28) 100%)',
+        'hero-bottom': 'linear-gradient(180deg, rgba(8,7,6,0) 55%, rgba(8,7,6,0.9) 100%)',
+        'panel-glow': 'radial-gradient(120% 120% at 15% 0%, rgba(203,163,92,0.10) 0%, rgba(203,163,92,0) 55%)',
       },
       keyframes: {
         'fade-up': {
@@ -40,10 +49,15 @@ export default {
           '0%,100%': { transform: 'translateY(0)' },
           '50%': { transform: 'translateY(-12px)' },
         },
+        shimmer: {
+          '0%': { backgroundPosition: '200% 0' },
+          '100%': { backgroundPosition: '-200% 0' },
+        },
       },
       animation: {
         'fade-up': 'fade-up 0.7s ease-out forwards',
         float: 'float 6s ease-in-out infinite',
+        shimmer: 'shimmer 6s linear infinite',
       },
     },
   },

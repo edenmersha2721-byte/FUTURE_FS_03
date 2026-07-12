@@ -33,8 +33,8 @@ export default function AdminMessages() {
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <div className="flex items-center gap-2">
-                <p className="font-medium text-charcoal">{m.name}</p>
-                {!m.is_read && <span className="rounded-full bg-gold/20 px-2 py-0.5 text-xs font-medium text-gold-dark">New</span>}
+                <p className="font-medium text-cream">{m.name}</p>
+                {!m.is_read && <span className="rounded-full bg-gold/20 px-2 py-0.5 text-xs font-medium text-gold">New</span>}
               </div>
               <p className="flex flex-wrap items-center gap-3 text-sm text-muted">
                 <span className="flex items-center gap-1"><Mail size={12} /> {m.email}</span>
@@ -43,11 +43,11 @@ export default function AdminMessages() {
             </div>
             <div className="flex items-center gap-2">
               <span className="text-xs text-muted">{formatDate(m.created_at)}</span>
-              {!m.is_read && <button onClick={() => markRead(m.id)} title="Mark read" className="rounded-lg p-2 text-blue-600 hover:bg-blue-50"><MailOpen size={16} /></button>}
-              <button onClick={() => remove(m.id)} title="Delete" className="rounded-lg p-2 text-rose-500 hover:bg-rose-50"><Trash2 size={16} /></button>
+              {!m.is_read && <button onClick={() => markRead(m.id)} title="Mark read" className="rounded-lg p-2 text-blue-300 hover:bg-blue-500/10"><MailOpen size={16} /></button>}
+              <button onClick={() => remove(m.id)} title="Delete" className="rounded-lg p-2 text-rose-300 hover:bg-rose-500/10"><Trash2 size={16} /></button>
             </div>
           </div>
-          {m.subject && <p className="mt-3 font-medium text-espresso">{m.subject}</p>}
+          {m.subject && <p className="mt-3 font-medium text-cream/80">{m.subject}</p>}
           <p className="mt-1 text-sm text-muted">{m.message}</p>
         </div>
       ))}

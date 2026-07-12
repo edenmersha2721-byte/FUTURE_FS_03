@@ -1,3 +1,4 @@
+import bcrypt from 'bcryptjs';
 import { query } from '../config/db.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { ApiError } from '../utils/ApiError.js';
@@ -20,7 +21,7 @@ const SELECT_FULL = `
   LEFT JOIN categories c ON c.id = s.category_id
 `;
 
-// POST /api/appointments  (customer)
+// POST /api/appointments  (guest or logged-in customer)
 export const createAppointment = asyncHandler(async (req, res) => {
   requireFields(req.body, ['service_id', 'appointment_date', 'appointment_time']);
   const { service_id, appointment_date, appointment_time, notes } = req.body;
@@ -36,12 +37,45 @@ export const createAppointment = asyncHandler(async (req, res) => {
     throw ApiError.badRequest('Appointments cannot be booked in the past');
   }
 
+  // Resolve the customer: logged-in user, or a guest identified by email.
+  let customerId;
+  if (req.user) {
+    customerId = req.user.id;
+  } else {
+    requireFields(req.body, ['guest_name', 'guest_email', 'guest_phone']);
+    const name = String(req.body.guest_name).trim();
+    const email = String(req.body.guest_email).trim().toLowerCase();
+    const phone = String(req.body.guest_phone).trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      throw ApiError.badRequest('Please provide a valid email address');
+    }
+
+    const existing = await query('SELECT id FROM users WHERE email = $1', [email]);
+    if (existing.rowCount) {
+      customerId = existing.rows[0].id;
+      // Backfill a phone number if the account doesn't have one yet.
+      await query(
+        `UPDATE users SET phone = COALESCE(NULLIF(phone, ''), $1), updated_at = NOW() WHERE id = $2`,
+        [phone, customerId]
+      );
+    } else {
+      // Create a lightweight guest customer account (random, unusable password).
+      const randomHash = await bcrypt.hash(`guest:${email}:${Date.now()}`, 10);
+      const created = await query(
+        `INSERT INTO users (name, email, password_hash, phone, role)
+         VALUES ($1,$2,$3,$4,'customer') RETURNING id`,
+        [name, email, randomHash, phone]
+      );
+      customerId = created.rows[0].id;
+    }
+  }
+
   const { rows } = await query(
     `INSERT INTO appointments
        (customer_id, service_id, appointment_date, appointment_time, notes, status, price_snapshot, service_name_snapshot)
      VALUES ($1,$2,$3,$4,$5,'pending',$6,$7)
      RETURNING *`,
-    [req.user.id, service_id, appointment_date, appointment_time, notes || null, service.price, service.name]
+    [customerId, service_id, appointment_date, appointment_time, notes || null, service.price, service.name]
   );
   res.status(201).json({ success: true, data: rows[0] });
 });

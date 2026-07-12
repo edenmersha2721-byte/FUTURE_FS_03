@@ -61,7 +61,7 @@ export default function AdminGallery() {
           <div key={g.id} className="group relative aspect-square overflow-hidden rounded-2xl">
             <img src={assetUrl(g.image_url)} alt={g.title} className="h-full w-full object-cover" />
             <div className="absolute inset-0 flex flex-col justify-between bg-gradient-to-t from-charcoal/80 to-transparent p-3 opacity-0 transition group-hover:opacity-100">
-              <button onClick={() => remove(g.id)} className="ml-auto rounded-full bg-white/90 p-2 text-rose-500 hover:bg-white"><Trash2 size={15} /></button>
+              <button onClick={() => remove(g.id)} className="ml-auto rounded-full bg-black/60 p-2 text-rose-300 hover:bg-black/80"><Trash2 size={15} /></button>
               <div className="text-cream">
                 <p className="font-medium">{g.title}</p>
                 {g.category && <p className="text-xs text-cream/70">{g.category}</p>}
@@ -84,7 +84,7 @@ export default function AdminGallery() {
           </div>
           <div>
             <label className="label">Upload Image</label>
-            <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-dashed border-sand px-4 py-3 text-sm text-muted hover:border-gold">
+            <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-dashed border-line px-4 py-3 text-sm text-muted hover:border-gold">
               <Upload size={16} /> {file ? file.name : 'Choose file…'}
               <input type="file" accept="image/*" className="hidden" onChange={(e) => setFile(e.target.files[0])} />
             </label>

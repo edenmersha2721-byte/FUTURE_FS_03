@@ -85,7 +85,7 @@ export default function AdminServices() {
       {loading ? <Loader /> : (
         <div className="card overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="bg-beige/50 text-xs uppercase tracking-wide text-muted">
+            <thead className="bg-white/[0.03] text-xs uppercase tracking-wide text-muted">
               <tr>
                 <th className="px-4 py-3">Service</th>
                 <th className="px-4 py-3">Category</th>
@@ -97,11 +97,11 @@ export default function AdminServices() {
             </thead>
             <tbody>
               {filtered.map((s) => (
-                <tr key={s.id} className="border-t border-sand/60">
+                <tr key={s.id} className="border-t border-line/60">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
                       <img src={assetUrl(s.image_url)} alt="" className="h-10 w-10 rounded-lg object-cover" />
-                      <span className="flex items-center gap-1.5 font-medium text-charcoal">
+                      <span className="flex items-center gap-1.5 font-medium text-cream">
                         {s.name}
                         {s.is_featured && <Star size={13} className="fill-gold text-gold" />}
                       </span>
@@ -109,16 +109,16 @@ export default function AdminServices() {
                   </td>
                   <td className="px-4 py-3 text-muted">{s.category_name || '—'}</td>
                   <td className="px-4 py-3 text-muted">{duration(s.duration_minutes)}</td>
-                  <td className="px-4 py-3 font-medium text-gold-dark">{currency(s.price)}</td>
+                  <td className="px-4 py-3 font-medium text-gold">{currency(s.price)}</td>
                   <td className="px-4 py-3">
-                    <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${s.is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-200 text-gray-600'}`}>
+                    <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${s.is_active ? 'bg-emerald-400/15 text-emerald-300 border border-emerald-400/25' : 'bg-white/10 text-muted border border-line'}`}>
                       {s.is_active ? 'Active' : 'Inactive'}
                     </span>
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex justify-end gap-2">
-                      <button onClick={() => openEdit(s)} className="rounded-lg p-2 text-blue-600 hover:bg-blue-50"><Pencil size={15} /></button>
-                      <button onClick={() => remove(s.id)} className="rounded-lg p-2 text-rose-500 hover:bg-rose-50"><Trash2 size={15} /></button>
+                      <button onClick={() => openEdit(s)} className="rounded-lg p-2 text-blue-300 hover:bg-blue-500/10"><Pencil size={15} /></button>
+                      <button onClick={() => remove(s.id)} className="rounded-lg p-2 text-rose-300 hover:bg-rose-500/10"><Trash2 size={15} /></button>
                     </div>
                   </td>
                 </tr>

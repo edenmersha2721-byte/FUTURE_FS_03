@@ -48,17 +48,17 @@ export default function DashboardShell({ title, nav, children }) {
   );
 
   return (
-    <div className="flex min-h-screen bg-cream">
+    <div className="flex min-h-screen bg-ink">
       {/* Desktop sidebar */}
-      <aside className="fixed inset-y-0 left-0 hidden w-64 bg-charcoal lg:block">
+      <aside className="fixed inset-y-0 left-0 hidden w-64 border-r border-line bg-charcoal lg:block">
         <SidebarContent />
       </aside>
 
       {/* Mobile drawer */}
       {open && (
         <div className="fixed inset-0 z-50 lg:hidden">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setOpen(false)} />
-          <aside className="absolute inset-y-0 left-0 w-64 bg-charcoal">
+          <div className="absolute inset-0 bg-black/70" onClick={() => setOpen(false)} />
+          <aside className="absolute inset-y-0 left-0 w-64 border-r border-line bg-charcoal">
             <button className="absolute right-3 top-4 text-cream" onClick={() => setOpen(false)}><X /></button>
             <SidebarContent />
           </aside>
@@ -67,14 +67,14 @@ export default function DashboardShell({ title, nav, children }) {
 
       {/* Main */}
       <div className="flex min-w-0 flex-1 flex-col lg:pl-64">
-        <header className="sticky top-0 z-40 flex items-center justify-between border-b border-sand bg-cream/90 px-5 py-4 backdrop-blur">
+        <header className="sticky top-0 z-40 flex items-center justify-between border-b border-line bg-ink/85 px-5 py-4 backdrop-blur">
           <div className="flex items-center gap-3">
-            <button className="lg:hidden" onClick={() => setOpen(true)}><Menu /></button>
-            <h1 className="font-serif text-2xl font-semibold text-charcoal">{title}</h1>
+            <button className="text-cream lg:hidden" onClick={() => setOpen(true)}><Menu /></button>
+            <h1 className="font-serif text-2xl font-semibold text-cream">{title}</h1>
           </div>
           <div className="flex items-center gap-3">
             <div className="text-right">
-              <p className="text-sm font-medium text-charcoal">{user?.name}</p>
+              <p className="text-sm font-medium text-cream">{user?.name}</p>
               <p className="text-xs capitalize text-muted">{user?.role}</p>
             </div>
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gold-gradient font-serif text-lg font-bold text-charcoal">

@@ -16,7 +16,7 @@ export default function RegisterPage() {
     setLoading(true);
     try {
       const user = await registerUser(data);
-      toast.success(`Welcome to Luxe Salon, ${user.name.split(' ')[0]}!`);
+      toast.success(`Welcome to Amra Beauty, ${user.name.split(' ')[0]}!`);
       navigate('/dashboard', { replace: true });
     } catch (e) {
       toast.error(e.friendlyMessage || 'Registration failed');
@@ -28,11 +28,11 @@ export default function RegisterPage() {
   return (
     <AuthShell
       title="Create Account"
-      subtitle="Join Luxe Salon to book and manage your appointments."
+      subtitle="Join Amra Beauty to book and manage your appointments."
       footer={
         <>
           Already have an account?{' '}
-          <Link to="/login" className="font-medium text-gold-dark hover:underline">
+          <Link to="/login" className="font-medium text-gold hover:underline">
             Sign in
           </Link>
         </>

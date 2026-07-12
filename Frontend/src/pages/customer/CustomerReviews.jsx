@@ -103,7 +103,7 @@ export default function CustomerReviews() {
               <p className="mt-3 text-muted">“{r.comment}”</p>
               <div className="mt-3 flex items-center gap-2 text-xs text-muted">
                 <span>{formatDate(r.created_at)}</span>
-                {r.is_featured && <span className="rounded-full bg-gold/20 px-2 py-0.5 text-gold-dark">Featured</span>}
+                {r.is_featured && <span className="rounded-full bg-gold/20 px-2 py-0.5 text-gold">Featured</span>}
               </div>
             </div>
           ))
