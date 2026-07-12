@@ -1,9 +1,12 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
 import L from 'leaflet';
-import { Phone, Mail, MapPin, Clock, Send, Instagram, Facebook, Youtube } from 'lucide-react';
+import {
+  Phone, Mail, MapPin, Clock, Send, Instagram, Facebook, Youtube,
+  Navigation, Loader2, Car, ExternalLink,
+} from 'lucide-react';
 import SectionHeading from '../common/SectionHeading.jsx';
 import Reveal from '../common/Reveal.jsx';
 import { contactApi } from '../../api/endpoints.js';
@@ -11,15 +14,29 @@ import { contactApi } from '../../api/endpoints.js';
 // Luxe Salon — 4 Kilo, Bashawelde Condominium, Addis Ababa
 const SALON_POSITION = [9.0356, 38.7638];
 
-const goldPin = L.divIcon({
-  className: '',
-  html: `<div style="transform:translate(-50%,-100%)">
-    <svg width="38" height="38" viewBox="0 0 24 24" fill="#1A1613" stroke="#C9A15A" stroke-width="1.5">
-      <path d="M12 21s-7-6.2-7-11a7 7 0 1 1 14 0c0 4.8-7 11-7 11z"/>
-      <circle cx="12" cy="10" r="2.6" fill="#C9A15A"/>
-    </svg></div>`,
-  iconSize: [38, 38],
-});
+const pin = (fill, stroke) =>
+  L.divIcon({
+    className: '',
+    html: `<div style="transform:translate(-50%,-100%)">
+      <svg width="38" height="38" viewBox="0 0 24 24" fill="${fill}" stroke="${stroke}" stroke-width="1.5">
+        <path d="M12 21s-7-6.2-7-11a7 7 0 1 1 14 0c0 4.8-7 11-7 11z"/>
+        <circle cx="12" cy="10" r="2.6" fill="${stroke}"/>
+      </svg></div>`,
+    iconSize: [38, 38],
+  });
+const goldPin = pin('#1A1613', '#C9A15A');
+const userPin = pin('#1A1613', '#2563eb');
+
+// Fits the map to show all given points whenever they change.
+function FitBounds({ points }) {
+  const map = useMap();
+  useEffect(() => {
+    if (points && points.length > 1) {
+      map.fitBounds(points, { padding: [40, 40] });
+    }
+  }, [points, map]);
+  return null;
+}
 
 const contactInfo = [
   { icon: Phone, title: 'Phone', lines: ['+1 (555) 123-4567'] },
@@ -28,9 +45,22 @@ const contactInfo = [
   { icon: Clock, title: 'Business Hours', lines: ['Mon – Sat: 9:00 AM – 8:00 PM', 'Sunday: 10:00 AM – 6:00 PM'] },
 ];
 
+const osmDirectionsUrl = (from) => {
+  const base = 'https://www.openstreetmap.org/directions';
+  const to = `${SALON_POSITION[0]},${SALON_POSITION[1]}`;
+  const fromParam = from ? `${from[0]},${from[1]}` : '';
+  return `${base}?engine=fossgis_osrm_car&route=${fromParam};${to}`;
+};
+
 export default function ContactSection() {
   const [submitting, setSubmitting] = useState(false);
   const { register, handleSubmit, reset, formState: { errors } } = useForm();
+
+  // Routing state
+  const [userPos, setUserPos] = useState(null);
+  const [route, setRoute] = useState(null);
+  const [routeInfo, setRouteInfo] = useState(null);
+  const [routing, setRouting] = useState(false);
 
   const onSubmit = async (data) => {
     setSubmitting(true);
@@ -43,6 +73,46 @@ export default function ContactSection() {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const getDirections = () => {
+    if (!navigator.geolocation) {
+      toast.error('Geolocation is not supported by your browser');
+      return;
+    }
+    setRouting(true);
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const from = [pos.coords.latitude, pos.coords.longitude];
+        setUserPos(from);
+        try {
+          // OSRM public routing (OpenStreetMap based). coords are lon,lat order.
+          const url =
+            `https://router.project-osrm.org/route/v1/driving/` +
+            `${from[1]},${from[0]};${SALON_POSITION[1]},${SALON_POSITION[0]}` +
+            `?overview=full&geometries=geojson`;
+          const res = await fetch(url);
+          const data = await res.json();
+          if (!data.routes || !data.routes.length) throw new Error('No route found');
+          const line = data.routes[0].geometry.coordinates.map(([lon, lat]) => [lat, lon]);
+          setRoute(line);
+          setRouteInfo({
+            distanceKm: (data.routes[0].distance / 1000).toFixed(1),
+            durationMin: Math.round(data.routes[0].duration / 60),
+          });
+          toast.success('Route to the salon is ready!');
+        } catch (e) {
+          toast.error('Could not calculate the route. Try the "Open in OpenStreetMap" link.');
+        } finally {
+          setRouting(false);
+        }
+      },
+      () => {
+        setRouting(false);
+        toast.error('Location access denied. Please allow location to get directions.');
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
   };
 
   return (
@@ -116,9 +186,39 @@ export default function ContactSection() {
                 </button>
               </form>
 
+              {/* Directions bar */}
+              <div className="mt-6 flex flex-col items-start justify-between gap-3 rounded-2xl bg-beige/50 p-4 sm:flex-row sm:items-center">
+                <div className="flex items-center gap-2 text-sm text-espresso">
+                  <MapPin size={16} className="text-gold-dark" />
+                  {routeInfo ? (
+                    <span className="flex items-center gap-3">
+                      <span className="flex items-center gap-1 font-medium"><Car size={15} /> {routeInfo.distanceKm} km</span>
+                      <span className="text-muted">≈ {routeInfo.durationMin} min drive</span>
+                    </span>
+                  ) : (
+                    <span>Find your way to Luxe Salon</span>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  <button type="button" onClick={getDirections} disabled={routing} className="btn-gold text-sm">
+                    {routing ? <Loader2 size={15} className="animate-spin" /> : <Navigation size={15} />}
+                    {routing ? 'Locating…' : 'Get Directions'}
+                  </button>
+                  <a
+                    href={osmDirectionsUrl(userPos)}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="btn-outline text-sm"
+                    title="Open in OpenStreetMap"
+                  >
+                    <ExternalLink size={15} /> Open Map
+                  </a>
+                </div>
+              </div>
+
               {/* Map */}
-              <div className="mt-6 h-64 overflow-hidden rounded-2xl border border-sand">
-                <MapContainer center={SALON_POSITION} zoom={16} className="h-full w-full" scrollWheelZoom={false}>
+              <div className="mt-4 h-72 overflow-hidden rounded-2xl border border-sand">
+                <MapContainer center={SALON_POSITION} zoom={15} className="h-full w-full" scrollWheelZoom={false}>
                   <TileLayer
                     attribution='&copy; OpenStreetMap contributors'
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -126,6 +226,13 @@ export default function ContactSection() {
                   <Marker position={SALON_POSITION} icon={goldPin}>
                     <Popup>Luxe Salon<br />4 Kilo, Bashawelde Condominium</Popup>
                   </Marker>
+                  {userPos && (
+                    <Marker position={userPos} icon={userPin}>
+                      <Popup>Your location</Popup>
+                    </Marker>
+                  )}
+                  {route && <Polyline positions={route} pathOptions={{ color: '#C9A15A', weight: 5, opacity: 0.9 }} />}
+                  {route && <FitBounds points={route} />}
                 </MapContainer>
               </div>
             </div>

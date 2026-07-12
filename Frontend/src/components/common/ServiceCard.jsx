@@ -3,12 +3,14 @@ import { Clock } from 'lucide-react';
 import { currency, duration } from '../../utils/format.js';
 import { assetUrl } from '../../api/client.js';
 
+const FALLBACK_IMG = 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800&q=80';
+
 export default function ServiceCard({ service }) {
   return (
     <div className="group card overflow-hidden transition-all duration-300 hover:-translate-y-1.5 hover:shadow-gold">
       <div className="relative aspect-[4/3] overflow-hidden">
         <img
-          src={assetUrl(service.image_url) || 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800&q=80'}
+          src={assetUrl(service.image_url) || FALLBACK_IMG}
           alt={service.name}
           className="h-full w-full object-cover transition-transform duration-500 [transform:scale(var(--z))] group-hover:[transform:scale(calc(var(--z)*1.08))]"
           style={{
@@ -16,6 +18,9 @@ export default function ServiceCard({ service }) {
             '--z': Number(service.image_zoom) || 1,
           }}
           loading="lazy"
+          onError={(e) => {
+            if (e.currentTarget.src !== FALLBACK_IMG) e.currentTarget.src = FALLBACK_IMG;
+          }}
         />
         {service.category_name && (
           <span className="absolute left-3 top-3 rounded-full bg-charcoal/70 px-3 py-1 text-xs font-medium text-cream backdrop-blur">

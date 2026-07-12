@@ -84,6 +84,14 @@ const galleryItems = [
   ['Perfect Manicure', 'Nail work', 'Nails', IMG.nails],
   ['Flawless Makeup', 'Makeup artistry', 'Makeup', IMG.makeup],
   ['Radiant Skin', 'Skin care', 'Skin Care', IMG.skincare],
+  ['Salon Interior', 'Our elegant space', 'Salon', 'https://images.unsplash.com/photo-1633681926022-84c23e8cb2d6?w=800&q=80'],
+  ['Bridal Glow', 'Bridal makeup artistry', 'Makeup', 'https://images.unsplash.com/photo-1519014816548-bf5fe059798b?w=800&q=80'],
+  ['Silky Blowout', 'Professional blow dry', 'Hair', IMG.blowdry],
+  ['Luxury Pedicure', 'Relaxing pedicure', 'Nails', 'https://images.unsplash.com/photo-1519823551278-64ac92734fb1?w=800&q=80'],
+  ['Hot Stone Therapy', 'Deep relaxation massage', 'Massage', IMG.massage],
+  ['Color Transformation', 'Vibrant hair color', 'Hair', IMG.haircolor],
+  ['Spa Serenity', 'Aromatherapy spa ritual', 'Spa', 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=800&q=80'],
+  ['Everyday Elegance', 'Natural glam look', 'Makeup', IMG.makeup],
 ];
 
 const promotions = [
