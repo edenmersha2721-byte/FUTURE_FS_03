@@ -10,6 +10,9 @@
     "db:migrate": "node src/db/migrate.js",
     "db:migrate:subcategories": "node src/db/migrate_subcategories.js",
     "db:migrate:reschedule": "node src/db/migrate_reschedule.js",
+    "db:migrate:inspirations": "node src/db/migrate_inspirations.js",
+    "db:migrate:inspo-booking": "node src/db/migrate_inspo_booking.js",
+    "db:migrate:inspo-framing": "node src/db/migrate_inspo_framing.js",
     "db:seed": "node src/db/seed.js",
     "db:reset": "node src/db/migrate.js && node src/db/seed.js"
   },

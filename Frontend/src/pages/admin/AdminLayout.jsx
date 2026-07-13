@@ -1,6 +1,6 @@
 import { Outlet, useLocation } from 'react-router-dom';
 import {
-  LayoutDashboard, Scissors, Tags, CalendarDays, Users, Image, BadgePercent, Star, Mail,
+  LayoutDashboard, Scissors, Tags, CalendarDays, Users, Image, BadgePercent, Star, Mail, Sparkles,
 } from 'lucide-react';
 import DashboardShell from '../../components/common/DashboardShell.jsx';
 
@@ -11,6 +11,7 @@ const nav = [
   { to: '/admin/categories', label: 'Categories', icon: Tags },
   { to: '/admin/customers', label: 'Customers', icon: Users },
   { to: '/admin/gallery', label: 'Gallery', icon: Image },
+  { to: '/admin/inspirations', label: 'Inspirations', icon: Sparkles },
   { to: '/admin/promotions', label: 'Promotions', icon: BadgePercent },
   { to: '/admin/reviews', label: 'Reviews', icon: Star },
   { to: '/admin/messages', label: 'Messages', icon: Mail },
@@ -23,6 +24,7 @@ const titles = {
   '/admin/categories': 'Category Management',
   '/admin/customers': 'Customers',
   '/admin/gallery': 'Gallery Management',
+  '/admin/inspirations': 'Inspiration Requests',
   '/admin/promotions': 'Promotions',
   '/admin/reviews': 'Reviews',
   '/admin/messages': 'Contact Messages',

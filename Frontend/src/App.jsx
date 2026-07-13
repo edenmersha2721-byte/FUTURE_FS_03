@@ -22,6 +22,7 @@ import AdminCategories from './pages/admin/AdminCategories.jsx';
 import AdminAppointments from './pages/admin/AdminAppointments.jsx';
 import AdminCustomers from './pages/admin/AdminCustomers.jsx';
 import AdminGallery from './pages/admin/AdminGallery.jsx';
+import AdminInspirations from './pages/admin/AdminInspirations.jsx';
 import AdminPromotions from './pages/admin/AdminPromotions.jsx';
 import AdminReviews from './pages/admin/AdminReviews.jsx';
 import AdminMessages from './pages/admin/AdminMessages.jsx';
@@ -72,6 +73,7 @@ export default function App() {
         <Route path="appointments" element={<AdminAppointments />} />
         <Route path="customers" element={<AdminCustomers />} />
         <Route path="gallery" element={<AdminGallery />} />
+        <Route path="inspirations" element={<AdminInspirations />} />
         <Route path="promotions" element={<AdminPromotions />} />
         <Route path="reviews" element={<AdminReviews />} />
         <Route path="messages" element={<AdminMessages />} />

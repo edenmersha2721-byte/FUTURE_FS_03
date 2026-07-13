@@ -6,6 +6,7 @@ import SectionHeading from '../common/SectionHeading.jsx';
 import ServiceCard from '../common/ServiceCard.jsx';
 import Reveal from '../common/Reveal.jsx';
 import Loader from '../common/Loader.jsx';
+import InspirationCTA from './InspirationCTA.jsx';
 import { serviceApi, categoryApi, subcategoryApi } from '../../api/endpoints.js';
 
 const CAT_ICON = {
@@ -148,6 +149,10 @@ export default function ServicesSection() {
         ) : (
           <p className="mt-12 text-center text-muted">No services in this selection yet.</p>
         )}
+
+        <Reveal>
+          <InspirationCTA />
+        </Reveal>
       </div>
     </section>
   );

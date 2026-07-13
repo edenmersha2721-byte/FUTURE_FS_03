@@ -9,6 +9,7 @@ import galleryRoutes from './gallery.routes.js';
 import promotionRoutes from './promotion.routes.js';
 import reviewRoutes from './review.routes.js';
 import contactRoutes from './contact.routes.js';
+import inspirationRoutes from './inspiration.routes.js';
 import dashboardRoutes from './dashboard.routes.js';
 import uploadRoutes from './upload.routes.js';
 
@@ -26,6 +27,7 @@ router.use('/gallery', galleryRoutes);
 router.use('/promotions', promotionRoutes);
 router.use('/reviews', reviewRoutes);
 router.use('/contact', contactRoutes);
+router.use('/inspirations', inspirationRoutes);
 router.use('/dashboard', dashboardRoutes);
 router.use('/upload', uploadRoutes);
 

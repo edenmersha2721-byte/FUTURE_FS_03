@@ -3,6 +3,7 @@ import toast from 'react-hot-toast';
 import { Search, CheckCircle2, XCircle, Check, Phone, Mail, CalendarClock } from 'lucide-react';
 import Loader from '../../components/common/Loader.jsx';
 import { appointmentApi } from '../../api/endpoints.js';
+import { assetUrl } from '../../api/client.js';
 import { currency, formatDate, formatTime, statusColor } from '../../utils/format.js';
 
 const FILTERS = ['all', 'pending', 'confirmed', 'completed', 'cancelled'];
@@ -89,7 +90,16 @@ export default function AdminAppointments() {
                     <p className="flex items-center gap-1 text-xs text-muted"><Mail size={11} /> {a.customer_email}</p>
                     {a.customer_phone && <p className="flex items-center gap-1 text-xs text-muted"><Phone size={11} /> {a.customer_phone}</p>}
                   </td>
-                  <td className="px-4 py-3 text-muted">{a.service_name || a.service_name_snapshot}</td>
+                  <td className="px-4 py-3 text-muted">
+                    <div className="flex items-center gap-2">
+                      {a.inspiration_image && (
+                        <a href={assetUrl(a.inspiration_image)} target="_blank" rel="noreferrer" title="View inspiration photo">
+                          <img src={assetUrl(a.inspiration_image)} alt="inspiration" className="h-10 w-10 shrink-0 rounded-lg object-cover ring-1 ring-gold/40" />
+                        </a>
+                      )}
+                      <span>{a.service_name || a.service_name_snapshot}</span>
+                    </div>
+                  </td>
                   <td className="px-4 py-3 text-muted">
                     {formatDate(a.appointment_date)}<br />{formatTime(a.appointment_time)}
                     {a.reschedule_date && (

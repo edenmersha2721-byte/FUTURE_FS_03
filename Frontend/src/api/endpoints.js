@@ -69,6 +69,14 @@ export const contactApi = {
   remove: (id) => api.delete(`/contact/${id}`),
 };
 
+export const inspirationApi = {
+  submit: (formData) => api.post('/inspirations', formData),
+  list: (params) => api.get('/inspirations', { params }),
+  approve: (id) => api.put(`/inspirations/${id}/approve`),
+  reject: (id) => api.put(`/inspirations/${id}/reject`),
+  remove: (id) => api.delete(`/inspirations/${id}`),
+};
+
 export const customerApi = {
   list: (params) => api.get('/customers', { params }),
   get: (id) => api.get(`/customers/${id}`),

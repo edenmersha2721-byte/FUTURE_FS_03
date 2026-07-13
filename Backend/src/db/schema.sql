@@ -4,6 +4,7 @@
 -- ============================================================
 
 -- Clean slate (safe re-run during development)
+DROP TABLE IF EXISTS inspirations CASCADE;
 DROP TABLE IF EXISTS contact_messages CASCADE;
 DROP TABLE IF EXISTS reviews CASCADE;
 DROP TABLE IF EXISTS appointments CASCADE;
@@ -111,6 +112,8 @@ CREATE TABLE appointments (
   -- snapshot of price/name at booking time (services may change later)
   price_snapshot   NUMERIC(10,2),
   service_name_snapshot VARCHAR(120),
+  -- photo attached when booking with an inspiration instead of a listed service
+  inspiration_image TEXT,
   created_at       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at       TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -160,6 +163,28 @@ CREATE TABLE promotions (
   is_active     BOOLEAN NOT NULL DEFAULT TRUE,
   created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- ------------------------------------------------------------
+--  Inspiration requests (customer-submitted look/photo for a
+--  service that may not be listed; admin approves or rejects)
+-- ------------------------------------------------------------
+CREATE TABLE inspirations (
+  id             SERIAL PRIMARY KEY,
+  customer_id    INTEGER REFERENCES users(id) ON DELETE SET NULL,
+  name           VARCHAR(120) NOT NULL,
+  email          VARCHAR(160) NOT NULL,
+  phone          VARCHAR(40),
+  note           TEXT,
+  image_url      TEXT NOT NULL,
+  image_pos_y    INTEGER NOT NULL DEFAULT 50,
+  image_zoom     NUMERIC(4,2) NOT NULL DEFAULT 1,
+  preferred_date DATE,
+  preferred_time TIME,
+  status         VARCHAR(20) NOT NULL DEFAULT 'pending',
+  appointment_id INTEGER REFERENCES appointments(id) ON DELETE SET NULL,
+  created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX idx_inspirations_status ON inspirations(status);
 
 -- ------------------------------------------------------------
 --  Contact Messages

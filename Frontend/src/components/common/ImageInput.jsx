@@ -17,6 +17,7 @@ export default function ImageInput({
   onPosYChange,
   zoom,
   onZoomChange,
+  endpoint = '/upload',
 }) {
   const fileRef = useRef(null);
   const frameRef = useRef(null);
@@ -33,7 +34,7 @@ export default function ImageInput({
     try {
       const fd = new FormData();
       fd.append('image', file);
-      const { data } = await api.post('/upload', fd);
+      const { data } = await api.post(endpoint, fd);
       onChange(data.url);
       toast.success('Image uploaded');
     } catch (e) {

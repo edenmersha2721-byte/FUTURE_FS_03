@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import Navbar from '../layouts/Navbar.jsx';
 import Loader from '../components/common/Loader.jsx';
+import InspirationCTA from '../components/sections/InspirationCTA.jsx';
 import { serviceApi, categoryApi, appointmentApi } from '../api/endpoints.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { currency, duration, formatDate, formatTime, todayISO } from '../utils/format.js';
@@ -313,6 +314,10 @@ export default function BookingPage() {
           </div>
         </div>
       )}
+
+      <div className="container-lux pb-16">
+        <InspirationCTA />
+      </div>
     </div>
   );
 }
