@@ -107,6 +107,11 @@ export default function BookingPage() {
   // Guest details (used only when not logged in)
   const [guest, setGuest] = useState({ name: '', email: '', phone: '' });
 
+  // Open the booking page at the top (router keeps the previous scroll position).
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   useEffect(() => {
     Promise.all([
       categoryApi.list({ active: 'true' }),

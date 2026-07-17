@@ -1,8 +1,9 @@
 # Amra Beauty — Business Pitch
 
 > **Internship Task 3 — Real Business Pitch**
-> Prepared by: _[Eden]_ · _[17/07/2026]_
+> Prepared by: **Eden** · 17/07/2026
 > Product: **Amra Beauty — Salon Booking & Management Platform**
+> Audience: the salon owner (as a real sales pitch) and the internship mentors (as the graded deliverable).
 
 ---
 
@@ -112,7 +113,8 @@ Positioned as a **one-time custom build with code ownership**, plus optional pai
 
 This reflects a real custom web application — booking workflow, admin dashboard, customer
 dashboard, service management, review moderation, notifications, and business-hours logic —
-not a basic website (which locally sits around 18,000–25,000 ETB).
+not a basic website, which in the local market typically ranges around 18,000–25,000 ETB.
+The gap is justified: this is a system that runs the business, not a page that describes it.
 
 **Optional add-ons (priced separately):**
 - Deployment & domain/email setup
@@ -154,6 +156,30 @@ not a basic website (which locally sits around 18,000–25,000 ETB).
 > your business every hour it's open, and every hour it's closed."
 
 **Next step:** schedule a 20-minute live demo.
+
+---
+
+## 11. For the mentors — project & my role
+
+This pitch is backed by a working, full-stack product I built during the internship, not a
+mock-up.
+
+- **What it is:** a complete salon booking and management platform with a public client
+  website, a customer dashboard, and an admin dashboard.
+- **My role:** full-stack development — designing the database, building the backend API,
+  and building the frontend interface, then connecting them into one working system.
+- **Tech stack:** React (frontend), Node.js/Express REST API (backend), PostgreSQL
+  (database), with token-based authentication and transactional email.
+- **Features delivered:** appointment booking with conflict-free scheduling, service &
+  category management, business hours and closed dates, customer self-reschedule,
+  inspiration/look requests, a photo gallery, promotions, in-app notifications, and a
+  moderated review system (new reviews stay pending until the admin approves them).
+- **What I learned:** turning a real business's day-to-day problems into software features,
+  designing a data model around a real workflow, and thinking about the product as
+  something a client would pay for and own — including how to price and position it.
+- **Status & honesty:** the core platform is built and demo-ready. Production launch items —
+  deployment, online payment integration, and domain-verified email — are scoped as clearly
+  defined next steps (see the roadmap and paid add-ons), not hidden gaps.
 
 ---
 
