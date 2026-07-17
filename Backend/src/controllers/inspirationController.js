@@ -3,6 +3,7 @@ import { query } from '../config/db.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { ApiError } from '../utils/ApiError.js';
 import { requireFields } from '../utils/validate.js';
+import { sendBookingApproved } from '../utils/mailer.js';
 
 const VALID_STATUS = ['pending', 'approved', 'rejected'];
 
@@ -110,6 +111,16 @@ export const approveInspiration = asyncHandler(async (req, res) => {
     `UPDATE inspirations SET status = 'approved', appointment_id = $1 WHERE id = $2 RETURNING *`,
     [appt.rows[0].id, insp.id]
   );
+
+  // Notify the customer (non-blocking)
+  sendBookingApproved({
+    to: insp.email,
+    name: insp.name,
+    serviceName: 'Your inspiration look',
+    date: insp.preferred_date,
+    time: insp.preferred_time,
+    note: insp.note,
+  });
 
   res.json({ success: true, data: updated.rows[0], appointment: appt.rows[0] });
 });

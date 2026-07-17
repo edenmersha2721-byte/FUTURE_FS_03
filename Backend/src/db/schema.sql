@@ -4,6 +4,9 @@
 -- ============================================================
 
 -- Clean slate (safe re-run during development)
+DROP TABLE IF EXISTS closed_dates CASCADE;
+DROP TABLE IF EXISTS business_hours CASCADE;
+DROP TABLE IF EXISTS notifications CASCADE;
 DROP TABLE IF EXISTS inspirations CASCADE;
 DROP TABLE IF EXISTS contact_messages CASCADE;
 DROP TABLE IF EXISTS reviews CASCADE;
@@ -131,10 +134,12 @@ CREATE TABLE reviews (
   rating      INTEGER NOT NULL CHECK (rating BETWEEN 1 AND 5),
   comment     TEXT NOT NULL,
   is_featured BOOLEAN NOT NULL DEFAULT FALSE,
-  is_approved BOOLEAN NOT NULL DEFAULT TRUE,
+  is_approved BOOLEAN NOT NULL DEFAULT FALSE, -- mirrors status='approved' for the public feed
+  status      VARCHAR(20) NOT NULL DEFAULT 'pending', -- pending | approved | rejected
   created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
-CREATE INDEX idx_reviews_featured ON reviews(is_featured);
+CREATE INDEX idx_reviews_approved ON reviews(is_approved);
+CREATE INDEX idx_reviews_status ON reviews(status);
 
 -- ------------------------------------------------------------
 --  Gallery
@@ -185,6 +190,47 @@ CREATE TABLE inspirations (
   created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 CREATE INDEX idx_inspirations_status ON inspirations(status);
+
+-- ------------------------------------------------------------
+--  Business hours (weekly schedule) + one-off closed dates
+-- ------------------------------------------------------------
+CREATE TABLE business_hours (
+  day_of_week INTEGER PRIMARY KEY CHECK (day_of_week BETWEEN 0 AND 6),
+  is_open     BOOLEAN NOT NULL DEFAULT TRUE,
+  open_time   TIME NOT NULL DEFAULT '09:00',
+  close_time  TIME NOT NULL DEFAULT '19:00'
+);
+-- Mon–Sat open 09:00–19:00, Sunday (0) closed.
+INSERT INTO business_hours (day_of_week, is_open, open_time, close_time) VALUES
+  (0, FALSE, '09:00', '19:00'),
+  (1, TRUE,  '09:00', '19:00'),
+  (2, TRUE,  '09:00', '19:00'),
+  (3, TRUE,  '09:00', '19:00'),
+  (4, TRUE,  '09:00', '19:00'),
+  (5, TRUE,  '09:00', '19:00'),
+  (6, TRUE,  '09:00', '19:00');
+
+CREATE TABLE closed_dates (
+  id         SERIAL PRIMARY KEY,
+  date       DATE NOT NULL UNIQUE,
+  reason     VARCHAR(160),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- ------------------------------------------------------------
+--  Notifications (in-app bell for admins and customers)
+-- ------------------------------------------------------------
+CREATE TABLE notifications (
+  id         SERIAL PRIMARY KEY,
+  user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  type       VARCHAR(40) NOT NULL DEFAULT 'info',
+  title      VARCHAR(160) NOT NULL,
+  message    TEXT,
+  link       VARCHAR(200),
+  is_read    BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX idx_notifications_user ON notifications(user_id, is_read);
 
 -- ------------------------------------------------------------
 --  Contact Messages

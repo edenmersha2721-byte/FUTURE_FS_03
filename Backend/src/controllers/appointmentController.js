@@ -3,8 +3,52 @@ import { query } from '../config/db.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { ApiError } from '../utils/ApiError.js';
 import { requireFields } from '../utils/validate.js';
+import {
+  sendBookingReceived,
+  sendBookingApproved,
+  sendBookingCancelled,
+  sendRescheduleRejected,
+  sendAdminNewBooking,
+  sendAdminCancelled,
+  sendAdminRescheduleRequest,
+} from '../utils/mailer.js';
+import { notifyUser, notifyAdmins, getActiveAdmins } from '../utils/notify.js';
+import { assertBookable } from '../utils/businessHours.js';
+
+// Fetch the full appointment row (customer + service joined).
+async function getFullAppointment(appointmentId) {
+  const { rows } = await query(`${SELECT_FULL} WHERE a.id = $1`, [appointmentId]);
+  return rows[0] || null;
+}
+
+// Email the customer a confirmation + create an in-app notification for them.
+async function notifyConfirmed(appointmentId) {
+  const a = await getFullAppointment(appointmentId);
+  if (!a) return;
+  const serviceName = a.service_name || a.service_name_snapshot;
+  sendBookingApproved({
+    to: a.customer_email,
+    name: a.customer_name,
+    serviceName,
+    date: a.appointment_date,
+    time: a.appointment_time,
+    note: a.notes,
+  });
+  await notifyUser(a.customer_id, {
+    type: 'appointment_confirmed',
+    title: 'Appointment confirmed',
+    message: `Your ${serviceName || 'appointment'} is confirmed.`,
+    link: '/dashboard/appointments',
+  });
+}
 
 const VALID_STATUS = ['pending', 'confirmed', 'completed', 'cancelled'];
+
+// "HH:MM[:SS]" -> minutes since midnight
+function timeToMinutes(t) {
+  const [h, m] = String(t).split(':').map(Number);
+  return (h || 0) * 60 + (m || 0);
+}
 
 const SELECT_FULL = `
   SELECT a.*,
@@ -35,6 +79,31 @@ export const createAppointment = asyncHandler(async (req, res) => {
   if (isNaN(when.getTime())) throw ApiError.badRequest('Invalid date or time');
   if (when.getTime() < Date.now()) {
     throw ApiError.badRequest('Appointments cannot be booked in the past');
+  }
+
+  // Must fall within the salon's working hours and not on a closed day.
+  await assertBookable(appointment_date, appointment_time, service.duration_minutes || 30);
+
+  // Prevent overlaps: reject if the requested slot clashes with a pending or
+  // confirmed appointment on the same day, accounting for each service's duration.
+  const startMin = timeToMinutes(appointment_time);
+  const endMin = startMin + (service.duration_minutes || 30);
+  const clash = await query(
+    `SELECT 1
+       FROM appointments a
+       LEFT JOIN services s ON s.id = a.service_id
+      WHERE a.appointment_date = $1
+        AND a.status IN ('pending', 'confirmed')
+        AND $2 < (EXTRACT(HOUR FROM a.appointment_time) * 60
+                  + EXTRACT(MINUTE FROM a.appointment_time)
+                  + COALESCE(s.duration_minutes, 30))
+        AND (EXTRACT(HOUR FROM a.appointment_time) * 60
+             + EXTRACT(MINUTE FROM a.appointment_time)) < $3
+      LIMIT 1`,
+    [appointment_date, startMin, endMin]
+  );
+  if (clash.rowCount) {
+    throw ApiError.badRequest('That time slot is already reserved. Please choose another time.');
   }
 
   // Resolve the customer: logged-in user, or a guest identified by email.
@@ -77,7 +146,70 @@ export const createAppointment = asyncHandler(async (req, res) => {
      RETURNING *`,
     [customerId, service_id, appointment_date, appointment_time, notes || null, service.price, service.name]
   );
+
+  // Notify everyone: customer gets a "received / pending" email, admins get an
+  // alert email + in-app notification. Failures here never block the booking.
+  const full = await getFullAppointment(rows[0].id);
+  if (full) {
+    sendBookingReceived({
+      to: full.customer_email,
+      name: full.customer_name,
+      serviceName: service.name,
+      date: appointment_date,
+      time: appointment_time,
+    });
+    // Customer in-app notification (visible if they log in with this account).
+    notifyUser(customerId, {
+      type: 'appointment_pending',
+      title: 'Booking request received',
+      message: `Your ${service.name} request is pending confirmation.`,
+      link: '/dashboard/appointments',
+    });
+    // Admins: email + in-app notification.
+    const admins = await getActiveAdmins();
+    for (const admin of admins) {
+      sendAdminNewBooking({
+        to: admin.email,
+        customerName: full.customer_name,
+        customerPhone: full.customer_phone,
+        serviceName: service.name,
+        date: appointment_date,
+        time: appointment_time,
+      });
+    }
+    notifyAdmins({
+      type: 'new_booking',
+      title: 'New booking request',
+      message: `${full.customer_name} requested ${service.name}.`,
+      link: '/admin/appointments',
+    });
+  }
+
   res.status(201).json({ success: true, data: rows[0] });
+});
+
+// GET /api/appointments/booked?date=YYYY-MM-DD  (public)
+// Returns pending + confirmed slots for a day so the booking UI can mark them reserved.
+export const bookedSlots = asyncHandler(async (req, res) => {
+  const { date } = req.query;
+  if (!date) throw ApiError.badRequest('A date is required');
+
+  const { rows } = await query(
+    `SELECT a.appointment_time,
+            COALESCE(s.duration_minutes, 30) AS duration_minutes
+       FROM appointments a
+       LEFT JOIN services s ON s.id = a.service_id
+      WHERE a.appointment_date = $1
+        AND a.status IN ('pending', 'confirmed')
+      ORDER BY a.appointment_time`,
+    [date]
+  );
+
+  const data = rows.map((r) => ({
+    time: String(r.appointment_time).slice(0, 5), // "HH:MM"
+    duration_minutes: r.duration_minutes,
+  }));
+  res.json({ success: true, count: data.length, data });
 });
 
 // GET /api/appointments/mine  (customer)
@@ -111,6 +243,29 @@ export const cancelMyAppointment = asyncHandler(async (req, res) => {
     `UPDATE appointments SET status = 'cancelled', updated_at = NOW() WHERE id = $1 RETURNING *`,
     [req.params.id]
   );
+
+  // Let the admins know a customer cancelled.
+  const full = await getFullAppointment(req.params.id);
+  if (full) {
+    const serviceName = full.service_name || full.service_name_snapshot;
+    const admins = await getActiveAdmins();
+    for (const admin of admins) {
+      sendAdminCancelled({
+        to: admin.email,
+        customerName: full.customer_name,
+        serviceName,
+        date: full.appointment_date,
+        time: full.appointment_time,
+      });
+    }
+    notifyAdmins({
+      type: 'appointment_cancelled',
+      title: 'Appointment cancelled',
+      message: `${full.customer_name} cancelled their ${serviceName || 'appointment'}.`,
+      link: '/admin/appointments',
+    });
+  }
+
   res.json({ success: true, data: updated.rows[0] });
 });
 
@@ -133,11 +288,40 @@ export const requestReschedule = asyncHandler(async (req, res) => {
   if (isNaN(when.getTime())) throw ApiError.badRequest('Invalid date or time');
   if (when.getTime() < Date.now()) throw ApiError.badRequest('The new time cannot be in the past');
 
+  // New slot must also fall within working hours / not on a closed day.
+  const fullAppt = await getFullAppointment(req.params.id);
+  await assertBookable(appointment_date, appointment_time, fullAppt?.duration_minutes || 30);
+
   const updated = await query(
     `UPDATE appointments SET reschedule_date = $1, reschedule_time = $2, updated_at = NOW()
      WHERE id = $3 RETURNING *`,
     [appointment_date, appointment_time, req.params.id]
   );
+
+  // Ask the admins to approve the new slot.
+  const full = await getFullAppointment(req.params.id);
+  if (full) {
+    const serviceName = full.service_name || full.service_name_snapshot;
+    const admins = await getActiveAdmins();
+    for (const admin of admins) {
+      sendAdminRescheduleRequest({
+        to: admin.email,
+        customerName: full.customer_name,
+        serviceName,
+        oldDate: appt.appointment_date,
+        oldTime: appt.appointment_time,
+        newDate: appointment_date,
+        newTime: appointment_time,
+      });
+    }
+    notifyAdmins({
+      type: 'reschedule_request',
+      title: 'Reschedule request',
+      message: `${full.customer_name} wants to move their ${serviceName || 'appointment'}.`,
+      link: '/admin/appointments',
+    });
+  }
+
   res.json({ success: true, data: updated.rows[0] });
 });
 
@@ -159,6 +343,7 @@ export const approveReschedule = asyncHandler(async (req, res) => {
      WHERE id = $1 RETURNING *`,
     [req.params.id]
   );
+  await notifyConfirmed(req.params.id);
   res.json({ success: true, data: updated.rows[0] });
 });
 
@@ -174,6 +359,26 @@ export const rejectReschedule = asyncHandler(async (req, res) => {
      WHERE id = $1 RETURNING *`,
     [req.params.id]
   );
+
+  // Tell the customer their reschedule was declined (original slot kept).
+  const full = await getFullAppointment(req.params.id);
+  if (full) {
+    const serviceName = full.service_name || full.service_name_snapshot;
+    sendRescheduleRejected({
+      to: full.customer_email,
+      name: full.customer_name,
+      serviceName,
+      date: full.appointment_date,
+      time: full.appointment_time,
+    });
+    notifyUser(full.customer_id, {
+      type: 'reschedule_rejected',
+      title: 'Reschedule declined',
+      message: `Your reschedule request was declined; your original time is kept.`,
+      link: '/dashboard/appointments',
+    });
+  }
+
   res.json({ success: true, data: updated.rows[0] });
 });
 
@@ -214,6 +419,40 @@ export const updateAppointmentStatus = asyncHandler(async (req, res) => {
     [status, req.params.id]
   );
   if (!rows[0]) throw ApiError.notFound('Appointment not found');
+
+  if (status === 'confirmed') {
+    await notifyConfirmed(req.params.id);
+  } else if (status === 'cancelled') {
+    // Admin cancelled — inform the customer.
+    const full = await getFullAppointment(req.params.id);
+    if (full) {
+      const serviceName = full.service_name || full.service_name_snapshot;
+      sendBookingCancelled({
+        to: full.customer_email,
+        name: full.customer_name,
+        serviceName,
+        date: full.appointment_date,
+        time: full.appointment_time,
+      });
+      notifyUser(full.customer_id, {
+        type: 'appointment_cancelled',
+        title: 'Appointment cancelled',
+        message: `Your ${serviceName || 'appointment'} was cancelled by the salon.`,
+        link: '/dashboard/appointments',
+      });
+    }
+  } else if (status === 'completed') {
+    const full = await getFullAppointment(req.params.id);
+    if (full) {
+      notifyUser(full.customer_id, {
+        type: 'appointment_completed',
+        title: 'Appointment completed',
+        message: `Thanks for visiting! We'd love a review of your ${full.service_name || full.service_name_snapshot || 'visit'}.`,
+        link: '/dashboard/reviews',
+      });
+    }
+  }
+
   res.json({ success: true, data: rows[0] });
 });
 

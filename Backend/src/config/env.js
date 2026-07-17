@@ -30,6 +30,14 @@ export const env = {
     password: process.env.ADMIN_PASSWORD || 'Admin@123',
     name: process.env.ADMIN_NAME || 'Salon Admin',
   },
+
+  mail: {
+    apiKey: process.env.RESEND_API_KEY || '',
+    // Must be an address on a domain verified in Resend. For quick testing use
+    // 'onboarding@resend.dev' (only delivers to your Resend account email).
+    from: process.env.MAIL_FROM || 'Amra Beauty <onboarding@resend.dev>',
+    salonName: process.env.SALON_NAME || 'Amra Beauty',
+  },
 };
 
 export const isProd = env.nodeEnv === 'production';

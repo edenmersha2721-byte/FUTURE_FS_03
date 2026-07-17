@@ -38,7 +38,7 @@ export default function ServiceCard({ service }) {
           <span className="gold-text font-serif text-2xl font-semibold">{currency(service.price)}</span>
         </div>
         <Link
-          to={`/book?service=${service.id}`}
+          to={`/book?service=${service.id}${service.category_slug ? `&category=${service.category_slug}` : ''}${service.subcategory_slug ? `&sub=${service.subcategory_slug}` : ''}`}
           className="btn-gold mt-4 w-full"
         >
           Book Now

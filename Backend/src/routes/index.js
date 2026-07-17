@@ -12,6 +12,8 @@ import contactRoutes from './contact.routes.js';
 import inspirationRoutes from './inspiration.routes.js';
 import dashboardRoutes from './dashboard.routes.js';
 import uploadRoutes from './upload.routes.js';
+import notificationRoutes from './notification.routes.js';
+import businessHoursRoutes from './businessHours.routes.js';
 
 const router = Router();
 
@@ -30,5 +32,7 @@ router.use('/contact', contactRoutes);
 router.use('/inspirations', inspirationRoutes);
 router.use('/dashboard', dashboardRoutes);
 router.use('/upload', uploadRoutes);
+router.use('/notifications', notificationRoutes);
+router.use('/business-hours', businessHoursRoutes);
 
 export default router;

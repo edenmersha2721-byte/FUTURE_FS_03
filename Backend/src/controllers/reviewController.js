@@ -10,12 +10,11 @@ const SELECT_FULL = `
   LEFT JOIN services s ON s.id = r.service_id
 `;
 
-// GET /api/reviews ?featured=true
+// GET /api/reviews  (public) - only approved reviews appear on the homepage
 export const listReviews = asyncHandler(async (req, res) => {
-  const featured = req.query.featured === 'true';
   const { rows } = await query(
     `${SELECT_FULL}
-     WHERE r.is_approved = TRUE ${featured ? 'AND r.is_featured = TRUE' : ''}
+     WHERE r.is_approved = TRUE
      ORDER BY r.created_at DESC`
   );
   res.json({ success: true, count: rows.length, data: rows });
@@ -36,9 +35,11 @@ export const createReview = asyncHandler(async (req, res) => {
   const rating = Number(req.body.rating);
   if (!(rating >= 1 && rating <= 5)) throw ApiError.badRequest('Rating must be between 1 and 5');
   const { service_id, comment } = req.body;
+  // New reviews start pending — an admin must approve before they appear on the
+  // homepage. Set explicitly so it never depends on the DB default.
   const { rows } = await query(
-    `INSERT INTO reviews (customer_id, service_id, rating, comment)
-     VALUES ($1,$2,$3,$4) RETURNING *`,
+    `INSERT INTO reviews (customer_id, service_id, rating, comment, is_approved, status)
+     VALUES ($1,$2,$3,$4, FALSE, 'pending') RETURNING *`,
     [req.user.id, service_id || null, rating, comment.trim()]
   );
   res.status(201).json({ success: true, data: rows[0] });
@@ -64,14 +65,22 @@ export const listAllReviews = asyncHandler(async (req, res) => {
   res.json({ success: true, count: rows.length, data: rows });
 });
 
-// PUT /api/reviews/:id (admin) - toggle featured/approved
+// PUT /api/reviews/:id (admin) - moderate a review: pending | approved | rejected
+const REVIEW_STATUSES = ['pending', 'approved', 'rejected'];
 export const updateReview = asyncHandler(async (req, res) => {
+  // Prefer an explicit `status`; fall back to the legacy `is_approved` boolean.
+  let status = req.body.status;
+  if (!status && req.body.is_approved !== undefined) {
+    status = toBool(req.body.is_approved) ? 'approved' : 'rejected';
+  }
+  if (!REVIEW_STATUSES.includes(status)) {
+    throw ApiError.badRequest(`status must be one of: ${REVIEW_STATUSES.join(', ')}`);
+  }
+
+  // is_approved mirrors status so the public feed (filtered on is_approved) stays correct.
   const { rows } = await query(
-    `UPDATE reviews SET
-       is_featured = COALESCE($1, is_featured),
-       is_approved = COALESCE($2, is_approved)
-     WHERE id = $3 RETURNING *`,
-    [toBool(req.body.is_featured) ?? null, toBool(req.body.is_approved) ?? null, req.params.id]
+    `UPDATE reviews SET status = $1, is_approved = $2 WHERE id = $3 RETURNING *`,
+    [status, status === 'approved', req.params.id]
   );
   if (!rows[0]) throw ApiError.notFound('Review not found');
   res.json({ success: true, data: rows[0] });

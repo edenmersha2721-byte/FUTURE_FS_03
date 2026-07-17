@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import {
   createAppointment,
+  bookedSlots,
   myAppointments,
   cancelMyAppointment,
   requestReschedule,
@@ -16,6 +17,9 @@ const router = Router();
 
 // Booking — open to guests and logged-in customers
 router.post('/', optionalAuth, createAppointment);
+
+// Reserved (confirmed) slots for a given date — public, powers the booking UI
+router.get('/booked', bookedSlots);
 
 // Customer
 router.get('/mine', protect, myAppointments);

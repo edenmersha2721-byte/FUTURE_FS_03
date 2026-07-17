@@ -9,7 +9,7 @@ export default function TestimonialsSection() {
 
   useEffect(() => {
     reviewApi
-      .list({ featured: 'true' })
+      .list()
       .then((res) => setReviews(res.data.data))
       .catch(() => {});
   }, []);

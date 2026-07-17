@@ -1,12 +1,13 @@
 import { Outlet, useLocation } from 'react-router-dom';
 import {
-  LayoutDashboard, Scissors, Tags, CalendarDays, Users, Image, BadgePercent, Star, Mail, Sparkles,
+  LayoutDashboard, Scissors, Tags, CalendarDays, Users, Image, BadgePercent, Star, Mail, Sparkles, Clock,
 } from 'lucide-react';
 import DashboardShell from '../../components/common/DashboardShell.jsx';
 
 const nav = [
   { to: '/admin', label: 'Overview', icon: LayoutDashboard, end: true },
   { to: '/admin/appointments', label: 'Appointments', icon: CalendarDays },
+  { to: '/admin/hours', label: 'Business Hours', icon: Clock },
   { to: '/admin/services', label: 'Services', icon: Scissors },
   { to: '/admin/categories', label: 'Categories', icon: Tags },
   { to: '/admin/customers', label: 'Customers', icon: Users },
@@ -20,6 +21,7 @@ const nav = [
 const titles = {
   '/admin': 'Dashboard Overview',
   '/admin/appointments': 'Appointments',
+  '/admin/hours': 'Business Hours',
   '/admin/services': 'Service Management',
   '/admin/categories': 'Category Management',
   '/admin/customers': 'Customers',

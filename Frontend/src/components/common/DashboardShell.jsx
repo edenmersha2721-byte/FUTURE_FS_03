@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { Menu, X, LogOut, Home } from 'lucide-react';
 import Logo from './Logo.jsx';
+import NotificationBell from './NotificationBell.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 
 export default function DashboardShell({ title, nav, children }) {
@@ -73,6 +74,7 @@ export default function DashboardShell({ title, nav, children }) {
             <h1 className="font-serif text-2xl font-semibold text-cream">{title}</h1>
           </div>
           <div className="flex items-center gap-3">
+            <NotificationBell />
             <div className="text-right">
               <p className="text-sm font-medium text-cream">{user?.name}</p>
               <p className="text-xs capitalize text-muted">{user?.role}</p>

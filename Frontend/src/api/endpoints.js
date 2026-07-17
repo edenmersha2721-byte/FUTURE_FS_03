@@ -31,6 +31,7 @@ export const subcategoryApi = {
 
 export const appointmentApi = {
   create: (data) => api.post('/appointments', data),
+  booked: (date) => api.get('/appointments/booked', { params: { date } }),
   mine: (params) => api.get('/appointments/mine', { params }),
   cancel: (id) => api.put(`/appointments/${id}/cancel`),
   reschedule: (id, data) => api.put(`/appointments/${id}/reschedule`, data),
@@ -85,4 +86,19 @@ export const customerApi = {
 
 export const dashboardApi = {
   stats: () => api.get('/dashboard/stats'),
+};
+
+export const notificationApi = {
+  list: () => api.get('/notifications'),
+  unreadCount: () => api.get('/notifications/unread-count'),
+  markRead: (id) => api.put(`/notifications/${id}/read`),
+  markAllRead: () => api.put('/notifications/read-all'),
+};
+
+export const businessHoursApi = {
+  schedule: () => api.get('/business-hours'),
+  daySlots: (date) => api.get('/business-hours/slots', { params: { date } }),
+  updateHours: (hours) => api.put('/business-hours', { hours }),
+  addClosedDate: (data) => api.post('/business-hours/closed-dates', data),
+  removeClosedDate: (id) => api.delete(`/business-hours/closed-dates/${id}`),
 };

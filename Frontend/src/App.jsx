@@ -20,6 +20,7 @@ import AdminOverview from './pages/admin/AdminOverview.jsx';
 import AdminServices from './pages/admin/AdminServices.jsx';
 import AdminCategories from './pages/admin/AdminCategories.jsx';
 import AdminAppointments from './pages/admin/AdminAppointments.jsx';
+import AdminHours from './pages/admin/AdminHours.jsx';
 import AdminCustomers from './pages/admin/AdminCustomers.jsx';
 import AdminGallery from './pages/admin/AdminGallery.jsx';
 import AdminInspirations from './pages/admin/AdminInspirations.jsx';
@@ -71,6 +72,7 @@ export default function App() {
         <Route path="services" element={<AdminServices />} />
         <Route path="categories" element={<AdminCategories />} />
         <Route path="appointments" element={<AdminAppointments />} />
+        <Route path="hours" element={<AdminHours />} />
         <Route path="customers" element={<AdminCustomers />} />
         <Route path="gallery" element={<AdminGallery />} />
         <Route path="inspirations" element={<AdminInspirations />} />

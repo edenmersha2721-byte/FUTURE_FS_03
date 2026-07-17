@@ -7,22 +7,23 @@ import {
 import Navbar from '../layouts/Navbar.jsx';
 import Loader from '../components/common/Loader.jsx';
 import InspirationCTA from '../components/sections/InspirationCTA.jsx';
-import { serviceApi, categoryApi, appointmentApi } from '../api/endpoints.js';
+import { serviceApi, categoryApi, subcategoryApi, appointmentApi, businessHoursApi } from '../api/endpoints.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { currency, duration, formatDate, formatTime, todayISO } from '../utils/format.js';
 import { assetUrl } from '../api/client.js';
 
-const TIME_SLOTS = [
-  '09:00', '10:00', '11:00', '12:00', '13:00',
-  '14:00', '15:00', '16:00', '17:00', '18:00', '19:00',
-];
 const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 function iso(y, m, d) {
   return `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
 }
 
-function Calendar({ selected, onSelect }) {
+function toMin(t) {
+  const [h, m] = String(t).split(':').map(Number);
+  return (h || 0) * 60 + (m || 0);
+}
+
+function Calendar({ selected, onSelect, isClosed }) {
   const now = new Date();
   const [view, setView] = useState({ y: now.getFullYear(), m: now.getMonth() });
   const first = new Date(view.y, view.m, 1);
@@ -55,15 +56,19 @@ function Calendar({ selected, onSelect }) {
           if (!d) return <span key={i} />;
           const dateStr = iso(view.y, view.m, d);
           const past = dateStr < today;
+          const closed = !past && isClosed?.(dateStr);
+          const disabled = past || closed;
           const isSel = dateStr === selected;
           return (
             <button
               key={i}
-              disabled={past}
+              disabled={disabled}
               onClick={() => onSelect(dateStr)}
+              title={closed ? 'Salon closed' : undefined}
               className={`aspect-square rounded-full text-sm transition ${
                 isSel ? 'bg-gold-gradient font-semibold text-charcoal'
                 : past ? 'cursor-not-allowed text-sand'
+                : closed ? 'cursor-not-allowed text-sand line-through'
                 : dateStr === today ? 'bg-white/5 font-medium hover:bg-gold/30'
                 : 'hover:bg-white/5'
               }`}
@@ -84,29 +89,56 @@ export default function BookingPage() {
 
   const [categories, setCategories] = useState([]);
   const [services, setServices] = useState([]);
+  const [subcategories, setSubcategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeCat, setActiveCat] = useState(null);
+  const [activeSub, setActiveSub] = useState(null); // subcategory id ("style"), or null for all
   const [selectedService, setSelectedService] = useState(null);
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
   const [notes, setNotes] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [booked, setBooked] = useState([]);
+  const [slotsLoading, setSlotsLoading] = useState(false);
+  const [schedule, setSchedule] = useState({ hours: [], closedDates: [] });
+  const [daySlots, setDaySlots] = useState([]); // bookable start times for the selected date
+  const [dayClosed, setDayClosed] = useState(false);
 
   // Guest details (used only when not logged in)
   const [guest, setGuest] = useState({ name: '', email: '', phone: '' });
 
   useEffect(() => {
-    Promise.all([categoryApi.list({ active: 'true' }), serviceApi.list({ active: 'true' })])
-      .then(([cat, svc]) => {
+    Promise.all([
+      categoryApi.list({ active: 'true' }),
+      serviceApi.list({ active: 'true' }),
+      subcategoryApi.list({ active: 'true' }),
+    ])
+      .then(([cat, svc, sub]) => {
         const cats = cat.data.data.filter((c) => Number(c.service_count) > 0);
         setCategories(cats);
         setServices(svc.data.data);
+        setSubcategories(sub.data.data);
 
+        // Preselect from the URL: a specific ?service=, or a ?category=/&sub= slug.
         const preId = Number(params.get('service'));
         const pre = svc.data.data.find((s) => s.id === preId);
+        const catSlug = params.get('category');
+        const subSlug = params.get('sub');
+
         if (pre) {
+          // Carry the service AND its category + style so nothing is re-selected.
           setSelectedService(pre);
           setActiveCat(pre.category_id);
+          setActiveSub(pre.subcategory_id || null);
+        } else if (catSlug) {
+          const c = cats.find((x) => x.slug === catSlug);
+          if (c) {
+            setActiveCat(c.id);
+            const sc = sub.data.data.find((x) => x.category_id === c.id && x.slug === subSlug);
+            if (sc) setActiveSub(sc.id);
+          } else if (cats[0]) {
+            setActiveCat(cats[0].id);
+          }
         } else if (cats[0]) {
           setActiveCat(cats[0].id);
         }
@@ -115,10 +147,83 @@ export default function BookingPage() {
       .finally(() => setLoading(false));
   }, [params]);
 
-  const catServices = useMemo(
-    () => services.filter((s) => s.category_id === activeCat),
-    [services, activeCat]
+  // Subcategories ("styles") available under the active category.
+  const catSubs = useMemo(
+    () => subcategories.filter((sc) => sc.category_id === activeCat),
+    [subcategories, activeCat]
   );
+
+  const catServices = useMemo(
+    () => services.filter(
+      (s) => s.category_id === activeCat && (!activeSub || s.subcategory_id === activeSub)
+    ),
+    [services, activeCat, activeSub]
+  );
+
+  // Load the salon's weekly schedule + closed dates once (to disable closed days).
+  useEffect(() => {
+    businessHoursApi.schedule()
+      .then((res) => setSchedule(res.data.data || { hours: [], closedDates: [] }))
+      .catch(() => { /* non-fatal: fall back to open calendar */ });
+  }, []);
+
+  // Is a given date closed (weekly day off or a specific holiday)?
+  const closedDateSet = useMemo(
+    () => new Set((schedule.closedDates || []).map((c) => c.date)),
+    [schedule]
+  );
+  const isClosed = useMemo(() => (dateStr) => {
+    if (closedDateSet.has(dateStr)) return true;
+    const dow = new Date(`${dateStr}T00:00:00`).getDay();
+    const h = (schedule.hours || []).find((x) => x.day_of_week === dow);
+    return h ? !h.is_open : false;
+  }, [closedDateSet, schedule]);
+
+  // Whenever the date changes, load that day's bookable slots + reserved slots.
+  useEffect(() => {
+    if (!date) {
+      setBooked([]);
+      setDaySlots([]);
+      setDayClosed(false);
+      return;
+    }
+    let alive = true;
+    setSlotsLoading(true);
+    Promise.all([businessHoursApi.daySlots(date), appointmentApi.booked(date)])
+      .then(([slotsRes, bookedRes]) => {
+        if (!alive) return;
+        const d = slotsRes.data.data || {};
+        setDayClosed(Boolean(d.closed));
+        setDaySlots(d.slots || []);
+        setBooked(bookedRes.data.data || []);
+      })
+      .catch(() => {
+        if (!alive) return;
+        setDaySlots([]);
+        setBooked([]);
+      })
+      .finally(() => { if (alive) setSlotsLoading(false); });
+    return () => { alive = false; };
+  }, [date]);
+
+  // Slots that overlap a reserved appointment's [start, start+duration) range.
+  const reserved = useMemo(() => {
+    const set = new Set();
+    for (const b of booked) {
+      const start = toMin(b.time);
+      const end = start + (b.duration_minutes || 60);
+      for (const t of daySlots) {
+        const ts = toMin(t);
+        if (ts < end && start < ts + 60) set.add(t);
+      }
+    }
+    return set;
+  }, [booked, daySlots]);
+
+  // If the chosen slot became reserved (e.g. after switching dates), clear it.
+  useEffect(() => {
+    if (time && reserved.has(time)) setTime('');
+  }, [reserved, time]);
 
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guest.email.trim());
   const guestValid = user || (guest.name.trim() && guest.phone.trim() && emailValid);
@@ -179,7 +284,7 @@ export default function BookingPage() {
               {categories.map((c) => (
                 <button
                   key={c.id}
-                  onClick={() => setActiveCat(c.id)}
+                  onClick={() => { setActiveCat(c.id); setActiveSub(null); }}
                   className={`rounded-full border px-4 py-1.5 text-sm transition ${
                     activeCat === c.id ? 'border-gold/60 bg-gold/15 text-gold' : 'border-line hover:border-gold'
                   }`}
@@ -188,6 +293,32 @@ export default function BookingPage() {
                 </button>
               ))}
             </div>
+
+            {/* Style (subcategory) filter — appears when the category has styles */}
+            {catSubs.length > 0 && (
+              <div className="mt-3 flex flex-wrap gap-2">
+                <button
+                  onClick={() => setActiveSub(null)}
+                  className={`rounded-full border px-3 py-1 text-xs transition ${
+                    !activeSub ? 'border-gold/60 bg-gold/15 text-gold' : 'border-line text-cream/70 hover:border-gold/40'
+                  }`}
+                >
+                  All Styles
+                </button>
+                {catSubs.map((sc) => (
+                  <button
+                    key={sc.id}
+                    onClick={() => setActiveSub(sc.id)}
+                    className={`rounded-full border px-3 py-1 text-xs transition ${
+                      activeSub === sc.id ? 'border-gold/60 bg-gold/15 text-gold' : 'border-line text-cream/70 hover:border-gold/40'
+                    }`}
+                  >
+                    {sc.name}
+                  </button>
+                ))}
+              </div>
+            )}
+
             <div className="mt-4 max-h-[380px] space-y-2 overflow-auto pr-1">
               {catServices.map((s) => (
                 <button
@@ -219,22 +350,47 @@ export default function BookingPage() {
           <div className="card p-6">
             <h2 className="font-serif text-2xl">2. Select Date &amp; Time</h2>
             <div className="mt-4">
-              <Calendar selected={date} onSelect={(d) => setDate(d)} />
+              <Calendar selected={date} onSelect={(d) => setDate(d)} isClosed={isClosed} />
             </div>
-            <p className="mt-5 text-sm font-medium text-cream/80">Available Time Slots</p>
-            <div className="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-4">
-              {TIME_SLOTS.map((t) => (
-                <button
-                  key={t}
-                  onClick={() => setTime(t)}
-                  className={`rounded-lg border py-2 text-sm transition ${
-                    time === t ? 'border-gold bg-gold-gradient font-semibold text-charcoal' : 'border-line hover:border-gold'
-                  }`}
-                >
-                  {formatTime(t)}
-                </button>
-              ))}
-            </div>
+            <p className="mt-5 text-sm font-medium text-cream/80">
+              Available Time Slots
+              {!date && <span className="ml-2 text-xs text-muted">— pick a date first</span>}
+              {date && slotsLoading && <span className="ml-2 text-xs text-muted">— checking availability…</span>}
+            </p>
+
+            {date && !slotsLoading && dayClosed ? (
+              <p className="mt-2 rounded-xl border border-rose-400/25 bg-rose-400/10 px-4 py-3 text-sm text-rose-200">
+                The salon is closed on this day. Please choose another date.
+              </p>
+            ) : date && !slotsLoading && daySlots.length === 0 ? (
+              <p className="mt-2 rounded-xl border border-line bg-white/[0.03] px-4 py-3 text-sm text-muted">
+                No time slots available for this day.
+              </p>
+            ) : (
+              <div className="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-4">
+                {daySlots.map((t) => {
+                  const isReserved = reserved.has(t);
+                  return (
+                    <button
+                      key={t}
+                      disabled={!date || isReserved}
+                      onClick={() => setTime(t)}
+                      title={isReserved ? 'This time is already reserved' : undefined}
+                      className={`rounded-lg border py-2 text-sm transition ${
+                        isReserved
+                          ? 'cursor-not-allowed border-line/60 bg-white/[0.03] text-sand line-through'
+                          : time === t
+                          ? 'border-gold bg-gold-gradient font-semibold text-charcoal'
+                          : 'border-line hover:border-gold disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-line'
+                      }`}
+                    >
+                      {formatTime(t)}
+                      {isReserved && <span className="mt-0.5 block text-[10px] font-medium tracking-wide">Reserved</span>}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           {/* Step 3: Details */}

@@ -103,7 +103,13 @@ export default function CustomerReviews() {
               <p className="mt-3 text-muted">“{r.comment}”</p>
               <div className="mt-3 flex items-center gap-2 text-xs text-muted">
                 <span>{formatDate(r.created_at)}</span>
-                {r.is_featured && <span className="rounded-full bg-gold/20 px-2 py-0.5 text-gold">Featured</span>}
+                <span className={`rounded-full px-2 py-0.5 ${
+                  r.status === 'approved' ? 'bg-emerald-400/15 text-emerald-300'
+                  : r.status === 'rejected' ? 'bg-rose-400/15 text-rose-300'
+                  : 'bg-white/10 text-muted'
+                }`}>
+                  {r.status === 'approved' ? 'Published' : r.status === 'rejected' ? 'Not approved' : 'Pending approval'}
+                </span>
               </div>
             </div>
           ))
